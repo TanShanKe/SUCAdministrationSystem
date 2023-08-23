@@ -48,6 +48,9 @@ echo "<body style='background-color:#E5F5F8'>";
 
 <script>
   var baseUrl = '../';
+  function back() {
+    location.href = 'viewResumption.php';
+  }
 </script>
 
 <style>
@@ -73,7 +76,7 @@ table,td{
   <div class="d-flex justify-content-center" style=" margin-top:40px ">
   <h3 style="margin-right: 20px">Resumption of Studies Application Result</h3>
   </div>
-    <div class="row" style="margin:40px;">
+    <div class="row" style="margin:40px; margin-top:15px">
     <label for="" class="form-label" >Application Details</label>
     <table class="table">  
         <tr>
@@ -115,7 +118,7 @@ table,td{
         </tr>  
     </table>
     <table class="table"> 
-    <label for="" class="form-label" >Academic Affairs & registration Office</label>
+    <label for="" class="form-label" >Academic Affairs & Registration Office</label>
         <tr>
           <th class="thReview">Acknowledge / <br>Not Acknowledge</th><td class="table-light"><?php echo $aaroAcknowledge; ?></td>
         </tr>
@@ -123,6 +126,7 @@ table,td{
           <th class="thReview">Comment / Remarks</th><td class="table-light"><?php echo $aaroComment; ?></td>
         </tr>   
     </table>
+    <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
     </div>
   </div>
 

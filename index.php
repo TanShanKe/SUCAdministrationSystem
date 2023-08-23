@@ -19,7 +19,7 @@ if (isset($_POST['login'])) {
           $_SESSION['userid'] = $userid;
           if($position == 'student'){
             header("Location: main.php");
-          }elseif($position == 'administrator'){
+          }elseif($position == 'aaro' || $position == 'afo' || $position == 'deanOrHod'){
             header("Location: adminMain.php");
           }
           exit;

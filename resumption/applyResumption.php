@@ -31,6 +31,15 @@ if(isset($_SESSION['userid'])) {
   
       $sql = "INSERT INTO resumption_of_studies_record (yearOfDeferment, semOfDeferment, yearOfResumption, semOfResumption, resumptionID, applicantID, applicantSignature, applicationDate) VALUES ('$yearOfDeferment', '$semOfDeferment', '$yearOfResumption', '$semOfResumption', '$generatedId', '$userid', '1', '$applicationDate')";
       $result=$conn->query($sql);
+
+      if ($result === TRUE) {
+        echo '<script type="text/javascript">';
+        echo 'alert("Your application successfully submitted!");'; 
+        echo 'window.location = "viewResumption.php";';
+        echo '</script>';
+      } else {
+          echo "Error: " . $conn->error;
+      }
       
       }
 
@@ -44,10 +53,10 @@ echo "<body style='background-color:#E5F5F8'>";
 
 <script>
   var baseUrl = '../';
-  </script>
-  <script>
-  function showSuccessMessage() {
-      alert("Your application successfully submitted!");
+  function confirmCancel() {
+    if (confirm('Are you sure you want to leave?')) {
+      location.href = 'viewResumption.php';
+    }
   }
 </script>
 
@@ -105,7 +114,8 @@ echo "<body style='background-color:#E5F5F8'>";
       </table>
       <p>I understand and agree that Southern University College has the permission to use my personal data for the purpose of administering. I have read, understand and agreed to the Personal Data Protection Act of Southern University College. <br> (Note: You may access and update your personal data by writing to us at <a href="mailto:reg@sc.edu.my">reg@sc.edu.my</a>)</p>
       </div>
-      <button name="apply" type="submit" class="btn btn-info" style="margin-left:20px;" onclick="showSuccessMessage()";>Apply</button>
+      <button name="apply" type="submit" class="btn btn-info" style="margin-left:20px;">Apply</button>
+      <button name="apply" type="button" class="btn btn-secondary" style="margin-left:20px;" onclick="confirmCancel()";>Cancel</button>
     </form>
   </div>
 </div>
