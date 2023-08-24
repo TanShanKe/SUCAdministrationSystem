@@ -1,5 +1,34 @@
 <?php
 include 'config.php';
+
+session_start();
+
+if (!isset($_SESSION['userid'])) {
+  header("Location: http://localhost/sucadministrationsystem/index.php");
+}
+
+$allowedPositions = ["deanOrHod", "aaro", "afo"];
+if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
+  header("Location: http://localhost/sucadministrationsystem/index.php");
+  exit();
+}
+
+$userid = $_SESSION['userid'];
+$position = $_SESSION['position'];
+
+if ($position == 'deanOrHod') {
+    $sql = "SELECT name FROM lecturer WHERE lecturerID  = '$userid'";
+}elseif ($position == 'aaro' || $position == 'afo') {
+    $sql = "SELECT name FROM administrator WHERE administratorID  = '$userid'";
+}
+
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $name=$row['name'];
+}  
+
 include 'header.php';
 echo "<body style='background-color:#E5F5F8'>";
 ?>
@@ -22,6 +51,7 @@ echo "<body style='background-color:#E5F5F8'>";
 
 <div class="container" style="padding-top: 50px;">
     <center>
+    <p>Logged in as <?php echo $position; ?>, <?php echo $name; ?></p>
   <div class="row" >
     <div class="col-sm" style="margin: 20px;">
         <a href="resumption/viewResumptionApplied.php">

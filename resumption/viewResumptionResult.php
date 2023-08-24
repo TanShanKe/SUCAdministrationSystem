@@ -1,6 +1,13 @@
 <?php
 include '../config.php';
 
+session_start();
+
+if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'student') {
+  header("Location: http://localhost/sucadministrationsystem/index.php");
+  exit();
+}
+
 $resumptionID = $_GET['resumptionID'];
 
 $sql = "SELECT student.name AS name, student.batchNo AS batchNo, applicantID, applicationDate, yearOfResumption, semOfResumption, yearOfDeferment, semOfDeferment, aaroAcknowledge, aaroComment, afoAcknowledge, afoComment, deanOrHeadAcknowledge, deanOrHeadComment FROM resumption_of_studies_record left join student on resumption_of_studies_record.applicantID=student.studentID WHERE resumptionID = '$resumptionID'";

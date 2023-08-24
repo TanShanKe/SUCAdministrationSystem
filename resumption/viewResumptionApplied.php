@@ -1,15 +1,15 @@
 <?php
 include '../config.php';
 session_start();
-$userid = $_SESSION['userid'];
 
-$sql = "SELECT * FROM users WHERE userid = '$userid'";
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $position = $row['position'];
+$allowedPositions = ["deanOrHod", "aaro", "afo"];
+if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
+  header("Location: http://localhost/sucadministrationsystem/index.php");
+  exit();
 }
+
+$userid = $_SESSION['userid'];
+$position = $_SESSION['position'];
 
 $sql1 = "SELECT DISTINCT YEAR(applicationDate) AS year FROM resumption_of_studies_record";
 $result1 = $conn->query($sql1);

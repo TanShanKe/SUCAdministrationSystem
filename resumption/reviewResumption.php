@@ -3,9 +3,20 @@ include '../config.php';
 
 session_start();
 
+if (!isset($_SESSION['userid'])) {
+  header("Location: http://localhost/sucadministrationsystem/index.php");
+}
+
+$allowedPositions = ["deanOrHod", "aaro", "afo"];
+if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
+  header("Location: http://localhost/sucadministrationsystem/index.php");
+  exit();
+}
+
 $resumptionID = $_GET['resumptionID'];
 $status = $_GET['status'];
 $userid = $_SESSION['userid'];
+$position = $_SESSION['position'];
 
 //select the applicant details
 $sql1 = "SELECT student.name AS name, student.batchNo AS batchNo, applicantID, applicationDate, yearOfResumption, semOfResumption, yearOfDeferment, semOfDeferment FROM resumption_of_studies_record left join student on resumption_of_studies_record.applicantID=student.studentID WHERE resumptionID = '$resumptionID'";
@@ -24,15 +35,6 @@ if ($result1->num_rows > 0) {
     $semOfDeferment=$row['semOfDeferment'];
   }
 }            
-
-//select the position of user
-$sql2 = "SELECT * FROM users WHERE userid = '$userid'";
-$result2 = $conn->query($sql2);
-
-if ($result2->num_rows > 0) {
-    $row = $result2->fetch_assoc();
-    $position = $row['position'];
-}
 
 //check is the temporary data exist
 $sql = "SELECT * FROM resumption_temporary WHERE id = '$resumptionID'";

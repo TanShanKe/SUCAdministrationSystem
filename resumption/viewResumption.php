@@ -1,6 +1,12 @@
 <?php
 include '../config.php';
 session_start();
+
+if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'student') {
+  header("Location: http://localhost/sucadministrationsystem/index.php");
+  exit();
+}
+
 $userid = $_SESSION['userid'];
 
 $sql1 = "SELECT DISTINCT YEAR(applicationDate) AS year FROM resumption_of_studies_record WHERE applicantID = '$userid'";

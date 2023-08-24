@@ -1,5 +1,23 @@
 <?php
 include 'config.php';
+
+session_start(); // Start the session
+
+if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'student') {
+  header("Location: http://localhost/sucadministrationsystem/index.php");
+  exit();
+}
+
+$userid = $_SESSION['userid'];
+
+$sql = "SELECT name FROM student WHERE studentID  = '$userid'";
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $name=$row['name'];
+}   
+
 include 'header.php';
 echo "<body style='background-color:#E5F5F8'>";
 ?>
@@ -22,6 +40,7 @@ echo "<body style='background-color:#E5F5F8'>";
 
 <div class="container" style="padding-top: 50px;">
     <center>
+    <p>Logged in as student, <?php echo $name; ?></p>
   <div class="row" >
     <div class="col-sm" style="margin: 20px;">
         <a href="subjectRegistration/applySubjectRegistration.php">

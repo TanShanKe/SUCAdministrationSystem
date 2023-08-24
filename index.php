@@ -17,6 +17,7 @@ if (isset($_POST['login'])) {
 
       if ($password === $stored_password) {
           $_SESSION['userid'] = $userid;
+          $_SESSION['position'] = $position;
           if($position == 'student'){
             header("Location: main.php");
           }elseif($position == 'aaro' || $position == 'afo' || $position == 'deanOrHod'){

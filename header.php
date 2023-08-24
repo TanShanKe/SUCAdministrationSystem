@@ -20,7 +20,7 @@
 <script>
   function confirmLogout() {
     if (confirm('Are you sure you want to logout?')) {
-      location.href = baseUrl + 'index.php';
+      location.href = baseUrl + 'logout.php';
     }
   }
 </script>
