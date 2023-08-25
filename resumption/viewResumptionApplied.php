@@ -32,6 +32,9 @@ echo "<body style='background-color:#E5F5F8'>";
 
 <script>
   var baseUrl = '../';
+  function back() {
+    location.href = '../adminMain.php';
+  }
 </script>
 
 <style>
@@ -55,25 +58,33 @@ table,td{
       <div class="row justify-content-center" style="margin: 20px;">
         <label for="year" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Year:</label>
         <select name="selected_year" id="selected_year" style="margin-right: 30px;">
-        <option value="">Year</option>
         <?php foreach ($years as $year) : ?>
-        <option value="<?php echo $year; ?>">
+        <option value="<?php echo $year; ?>" <?php if (isset($_POST['selected_year']) && $_POST['selected_year'] == $year || (!isset($_POST['selected_year']) && $year == $default_year)) echo 'selected="selected"'; ?>>
             <?php echo $year; ?>
         </option>
         <?php endforeach; ?>
         </select>
         <label for="sem" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Sem:</label>
         <select name="selected_sem" id="selected_sem" style="margin-right: 30px;">
-        <option value="">Sem</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
+          <option value="1" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '1' || (!isset($_POST['selected_sem']) && $default_sem == '1')) echo 'selected="selected"'; ?>>1</option>
+          <option value="2" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '2' || (!isset($_POST['selected_sem']) && $default_sem == '2')) echo 'selected="selected"'; ?>>2</option>
+          <option value="3" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '3' || (!isset($_POST['selected_sem']) && $default_sem == '3')) echo 'selected="selected"'; ?>>3</option>
         </select>
         <label for="status" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Status:</label>
         <select name="selected_status" id="selected_status" style="margin-right: 30px;">
-          <option value="">Status</option>
-          <option value="approval">Approval</option>
-          <option value="completed">Completed</option>
+          <option value="">All</option>
+          <option value="approval" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'approval') echo 'selected="selected"'; ?>>Approval</option>
+          <option value="completed" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'completed') echo 'selected="selected"'; ?>>Completed</option>
+          <?php
+            if ($position == 'aaro') {
+              // Add the 'AllDone' option for AARO
+              echo '<option value="alldone"';
+              if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'alldone') {
+                echo ' selected="selected"';
+              }
+              echo '>AllDone</option>';
+            }
+          ?>
         </select>
         <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
       </div>
@@ -138,6 +149,8 @@ table,td{
         $sql .= " AND aaroSignature = 1";
       } elseif($selectedStatus == 'completed' && $position == 'afo'){
         $sql .= " AND afoSignature = 1";
+      } elseif($selectedStatus == 'alldone'){
+        $sql .= " AND afoSignature = 1 AND aaroSignature = 1 AND deanOrHeadSignature = 1";
       }
 
       $sql .= " ORDER BY applicationDate DESC";
@@ -168,13 +181,16 @@ table,td{
                 }else{
                   $status = 'Completed';
                 }
+                if($deanOrHeadSignature == 1 && $aaroSignature == 1 && $afoSignature == 1){
+                  $status = 'AllDone';
+                }
               } elseif($position =='afo'){
                 if($afoSignature == 0){
                   $status = 'Approval';
                 }else{
                   $status = 'Completed';
                 }
-              }
+              } 
                     
             ?>
         <tr>
@@ -193,6 +209,7 @@ table,td{
         }
         ?> 
     </table>
+    <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
     </div>
   </div>
 

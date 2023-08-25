@@ -287,10 +287,10 @@ table,td{
         <table style="border:none;">
           <tr>
             <td style="vertical-align: top; border:none;"><input type="checkbox" name="agree" id="agree" style="margin-top: 7px; margin-right: 20px;" required></td>
-            <td style="border:none;"><label for="pdpa"><strong>Personal Data Protection Act (PDPA)</strong></label></td>
+            <td style="border:none;"><label for="pdpa"><strong>Decision Responsibility Acknowledgment</strong></label></td>
           </tr>
         </table>
-        <p>I understand and agree that Southern University College has the permission to use my personal data for the purpose of administering. I have read, understand and agreed to the Personal Data Protection Act of Southern University College. <br> (Note: You may access and update your personal data by writing to us at <a href="mailto:reg@sc.edu.my">reg@sc.edu.my</a>)</p>
+        <p>I voluntarily acknowledge and accept full responsibility for the decision I am about to make, understanding that my choice will have significant consequences.</p>
         </div>
         <input type="hidden" name="resumptionID" value="<?php echo $resumptionID; ?>">
         <button name="submit" type="submit" class="btn btn-primary" style="margin-left:20px;";>Submit</button>
@@ -312,7 +312,7 @@ table,td{
         echo '<label for="" class="form-label" >Account & Finance Office</label>';
         $sql = "SELECT administrator.name AS name, afoID AS id, afoAcknowledge AS decision, afoComment AS comment, afoAcknowledgeDate AS acknoewledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.afoID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
         $result = $conn->query($sql);
-      }
+      }    
 
       if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
@@ -344,8 +344,110 @@ table,td{
     <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
     <?php
       } 
-    }
-    ?>
+    } elseif($status == 'AllDone'){
+        echo '<label for="" class="form-label" >Faculty (Head of Department / Dean)</label>';
+        $sql1 = "SELECT lecturer.name AS name, deanOrHeadID AS id, deanOrHeadAcknowledge AS decision, deanOrHeadComment AS comment, deanOrHeadAcknowledgeDate AS acknoewledgeDate FROM resumption_of_studies_record left join lecturer on resumption_of_studies_record.deanOrHeadID=lecturer.lecturerID WHERE resumptionID = '$resumptionID'";
+        $result1 = $conn->query($sql1);
+
+        if ($result1->num_rows > 0) {
+          while ($row = $result1->fetch_assoc()) {
+            $name=$row['name'];
+            $id=$row['id'];
+            $decision=$row['decision'];
+            $comment=$row['comment'];
+            $acknoewledgeDate=$row['acknoewledgeDate'];
+            if($decision == 1){
+              $acknowledge = 'Acknowledge';
+            }elseif($decision == 0){
+              $acknowledge = 'Not Acknowledge';
+            }
+          }
+          ?>
+        <table class="table">  
+          <tr>
+            <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+            <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $acknoewledgeDate; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
+          </tr> 
+      </table>
+      <?php
+        } 
+        
+        echo '<label for="" class="form-label" >Academic Affairs & Registration Office</label>';
+        $sql2 = "SELECT administrator.name AS name, aaroID AS id, aaroAcknowledge AS decision, aaroComment AS comment, aaroAcknowledgeDate AS acknoewledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.aaroID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
+        $result2 = $conn->query($sql2);
+
+        if ($result2->num_rows > 0) {
+          while ($row = $result2->fetch_assoc()) {
+            $name=$row['name'];
+            $id=$row['id'];
+            $decision=$row['decision'];
+            $comment=$row['comment'];
+            $acknoewledgeDate=$row['acknoewledgeDate'];
+            if($decision == 1){
+              $acknowledge = 'Acknowledge';
+            }elseif($decision == 0){
+              $acknowledge = 'Not Acknowledge';
+            }
+          }
+          ?>
+        <table class="table">  
+          <tr>
+            <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+            <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $acknoewledgeDate; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
+          </tr> 
+      </table>
+      <?php
+        } 
+
+        echo '<label for="" class="form-label" >Account & Finance Office</label>';
+        $sql3 = "SELECT administrator.name AS name, afoID AS id, afoAcknowledge AS decision, afoComment AS comment, afoAcknowledgeDate AS acknoewledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.afoID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
+        $result3 = $conn->query($sql3);
+      
+        if ($result3->num_rows > 0) {
+          while ($row = $result3->fetch_assoc()) {
+            $name=$row['name'];
+            $id=$row['id'];
+            $decision=$row['decision'];
+            $comment=$row['comment'];
+            $acknoewledgeDate=$row['acknoewledgeDate'];
+            if($decision == 1){
+              $acknowledge = 'Acknowledge';
+            }elseif($decision == 0){
+              $acknowledge = 'Not Acknowledge';
+            }
+          }
+          ?>
+        <table class="table">  
+          <tr>
+            <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+            <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $acknoewledgeDate; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
+          </tr> 
+      </table>
+      <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
+      <?php
+        }       
+    }?>
   
     </div>
   </div>
