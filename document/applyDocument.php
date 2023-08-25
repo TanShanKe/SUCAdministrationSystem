@@ -3,49 +3,50 @@ include '../config.php';
 
 session_start(); // Start the session
 
-if(isset($_SESSION['userid'])) {
-    $userid = $_SESSION['userid'];
-  
-    if(isset($_POST['apply'])){
-
-      date_default_timezone_set('Asia/Kuala_Lumpur');
-  
-      // Generate id
-      $currentYear = date("y"); 
-      $currentMonth = date("m"); 
-      // Use a separate file for each month
-      $counterFile = "id_counter_" . $currentYear . $currentMonth . ".txt"; 
-      if (!file_exists($counterFile)) {
-          file_put_contents($counterFile, "1");
-      }
-      $currentCounter = intval(file_get_contents($counterFile));
-      $generatedId = $currentYear . $currentMonth . str_pad($currentCounter, 3, "0", STR_PAD_LEFT);
-      $currentCounter++;
-      file_put_contents($counterFile, $currentCounter);
-  
-      $yearOfDeferment=$_POST['yearOfDeferment'];
-      $semOfDeferment=$_POST['semOfDeferment']; 
-      $yearOfResumption=$_POST['yearOfResumption']; 
-      $semOfResumption=$_POST['semOfResumption'];
-      $applicationDate=date("Y-m-d"); 
-  
-      $sql = "INSERT INTO resumption_of_studies_record (yearOfDeferment, semOfDeferment, yearOfResumption, semOfResumption, resumptionID, applicantID, applicantSignature, applicationDate) VALUES ('$yearOfDeferment', '$semOfDeferment', '$yearOfResumption', '$semOfResumption', '$generatedId', '$userid', '1', '$applicationDate')";
-      $result=$conn->query($sql);
-
-      if ($result === TRUE) {
-        echo '<script type="text/javascript">';
-        echo 'alert("Your application successfully submitted!");'; 
-        echo 'window.location = "viewResumption.php";';
-        echo '</script>';
-      } else {
-          echo "Error: " . $conn->error;
-      }
-      
-      }
-
-} else {
-    echo "Please log in first";
+if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'student') {
+  header("Location: http://localhost/sucadministrationsystem/index.php");
+  exit();
 }
+
+$userid = $_SESSION['userid'];
+
+if(isset($_POST['apply'])){
+
+  date_default_timezone_set('Asia/Kuala_Lumpur');
+
+  // Generate id
+  $currentYear = date("y"); 
+  $currentMonth = date("m"); 
+  // Use a separate file for each month
+  $counterFile = "id_counter_" . $currentYear . $currentMonth . ".txt"; 
+  if (!file_exists($counterFile)) {
+      file_put_contents($counterFile, "1");
+  }
+  $currentCounter = intval(file_get_contents($counterFile));
+  $generatedId = $currentYear . $currentMonth . str_pad($currentCounter, 3, "0", STR_PAD_LEFT);
+  $currentCounter++;
+  file_put_contents($counterFile, $currentCounter);
+
+  $yearOfDeferment=$_POST['yearOfDeferment'];
+  $semOfDeferment=$_POST['semOfDeferment']; 
+  $yearOfResumption=$_POST['yearOfResumption']; 
+  $semOfResumption=$_POST['semOfResumption'];
+  $applicationDate=date("Y-m-d"); 
+
+  $sql = "INSERT INTO resumption_of_studies_record (yearOfDeferment, semOfDeferment, yearOfResumption, semOfResumption, resumptionID, applicantID, applicantSignature, applicationDate) VALUES ('$yearOfDeferment', '$semOfDeferment', '$yearOfResumption', '$semOfResumption', '$generatedId', '$userid', '1', '$applicationDate')";
+  $result=$conn->query($sql);
+
+  if ($result === TRUE) {
+    echo '<script type="text/javascript">';
+    echo 'alert("Your application successfully submitted!");'; 
+    echo 'window.location = "viewResumption.php";';
+    echo '</script>';
+  } else {
+      echo "Error: " . $conn->error;
+  }
+  
+  }
+
 
 include '../header.php';
 echo "<body style='background-color:#E5F5F8'>";
