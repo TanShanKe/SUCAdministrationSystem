@@ -61,8 +61,8 @@ echo "<body style='background-color:#E5F5F8'>";
   }
 </script>
 
-<div class="row">
-  <div class="col" style="margin: 40px;">
+
+  <div style="margin: 40px;">
     <form  action="" method="post" enctype="multipart/form-data">
       <h3 style="margin-top: 10px; margin-bottom: 30px;"><center>Resumption of Studies Application Form</center></h3>
       <div class="row" style="margin: 20px;"> 
@@ -73,7 +73,7 @@ echo "<body style='background-color:#E5F5F8'>";
         <select name="yearOfDeferment" id="yearOfDeferment" style="margin-right: 50px;">
             <?php
             $currentYear = date("Y");
-            for ($i = $currentYear - 4; $i <= $currentYear; $i++) {
+            for ($i = $currentYear - 1; $i <= $currentYear; $i++) {
                 echo "<option value=\"$i\">$i</option>";
             }
             ?>
@@ -93,7 +93,7 @@ echo "<body style='background-color:#E5F5F8'>";
         <select name="yearOfResumption" id="yearOfResumption" style="margin-right: 50px;">
             <?php
             $currentYear = date("Y");
-            for ($i = $currentYear; $i <= $currentYear + 2; $i++) {
+            for ($i = $currentYear; $i <= $currentYear + 1; $i++) {
                 echo "<option value=\"$i\">$i</option>";
             }
             ?>
@@ -119,7 +119,6 @@ echo "<body style='background-color:#E5F5F8'>";
       <button name="apply" type="button" class="btn btn-secondary" style="margin-left:20px;" onclick="confirmCancel()";>Cancel</button>
     </form>
   </div>
-</div>
 
   </body>
 </html>

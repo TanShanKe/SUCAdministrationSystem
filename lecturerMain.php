@@ -7,7 +7,7 @@ if (!isset($_SESSION['userid'])) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
 }
 
-$allowedPositions = ["deanOrHod", "aaro", "afo", "library", "sao", "iso", "sro"];
+$allowedPositions = ["lecturer"];
 if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
   exit();
@@ -16,11 +16,8 @@ if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPosi
 $userid = $_SESSION['userid'];
 $position = $_SESSION['position'];
 
-if ($position == 'deanOrHod') {
-    $sql = "SELECT name FROM lecturer WHERE lecturerID  = '$userid'";
-}else {
-    $sql = "SELECT name FROM administrator WHERE administratorID  = '$userid'";
-}
+$sql = "SELECT name FROM lecturer WHERE lecturerID  = '$userid'";
+
 
 $result = $conn->query($sql);
 
@@ -54,41 +51,15 @@ echo "<body style='background-color:#E5F5F8'>";
     <p>Logged in as <?php echo $position; ?>, <?php echo $name; ?></p>
   <div class="row" >
     <div class="col-sm" style="margin: 20px;">
-        <a href="resumption/viewResumptionApplied.php">
-            <img src="images/subjects.png" class="image">
-            <label class="form-label font">Subject Registration Application</label>
-        </a>
-    </div>
-    <div class="col-sm" style="margin: 20px;">
         <a href="leave/viewLeaveApplied.php">
             <img src="images/leave.png" class="image"><br>
             <label class="form-label font">Incident & Funerary Leave Application</label>
         </a>
     </div>
     <div class="col-sm" style="margin: 20px;">
-        <a href="replacement/viewReplacementApplied.php">
+        <a href="replacement/viewReplacement.php">
             <img src="images/change.png" class="image"><br>
             <label class="form-label font">Replacement/ Permanent Change of Class Room Venue/ Time</label>
-        </a>
-    </div>
-    </div>
-    <div class="row">
-    <div class="col-sm" style="margin: 20px;">
-        <a href="deferment/viewDefermentApplied.php">
-            <img src="images/deferment.png" class="image"><br>
-            <label class="form-label font">Deferment/ Withdrawal Application</label>
-        </a>
-    </div>
-    <div class="col-sm" style="margin: 20px;">
-        <a href="resumption/viewResumptionApplied.php">
-            <img src="images/resumption.png" class="image"><br>
-            <label class="form-label font">Resumption of Studies Application</label>
-        </a>
-    </div>
-    <div class="col-sm" style="margin: 20px;">
-        <a href="document/viewDocumentApplied.php">
-            <img src="images/document.png" class="image"><br>
-            <label class="form-label font">Document Application</label>
         </a>
     </div>
     </div>

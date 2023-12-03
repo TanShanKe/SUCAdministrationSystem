@@ -7,7 +7,7 @@ $_SESSION = array();
 // Destroy the session
 session_destroy();
 
-// Redirect the user to the login page or another appropriate page
+// Redirect the user to the login page
 header("Location: http://localhost/sucadministrationsystem/index.php");
 exit(); // Terminate script execution after the redirect
 ?>

@@ -7,7 +7,7 @@ if (!isset($_SESSION['userid'])) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
 }
 
-$allowedPositions = ["deanOrHod", "aaro", "afo", "library", "sao", "iso", "sro"];
+$allowedPositions = ["deanOrHod"];
 if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
   exit();
@@ -16,11 +16,9 @@ if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPosi
 $userid = $_SESSION['userid'];
 $position = $_SESSION['position'];
 
-if ($position == 'deanOrHod') {
-    $sql = "SELECT name FROM lecturer WHERE lecturerID  = '$userid'";
-}else {
-    $sql = "SELECT name FROM administrator WHERE administratorID  = '$userid'";
-}
+
+$sql = "SELECT name FROM lecturer WHERE lecturerID  = '$userid'";
+
 
 $result = $conn->query($sql);
 
@@ -74,7 +72,7 @@ echo "<body style='background-color:#E5F5F8'>";
     </div>
     <div class="row">
     <div class="col-sm" style="margin: 20px;">
-        <a href="deferment/viewDefermentApplied.php">
+        <a href="resumption/viewResumptionApplied.php">
             <img src="images/deferment.png" class="image"><br>
             <label class="form-label font">Deferment/ Withdrawal Application</label>
         </a>
@@ -83,12 +81,6 @@ echo "<body style='background-color:#E5F5F8'>";
         <a href="resumption/viewResumptionApplied.php">
             <img src="images/resumption.png" class="image"><br>
             <label class="form-label font">Resumption of Studies Application</label>
-        </a>
-    </div>
-    <div class="col-sm" style="margin: 20px;">
-        <a href="document/viewDocumentApplied.php">
-            <img src="images/document.png" class="image"><br>
-            <label class="form-label font">Document Application</label>
         </a>
     </div>
     </div>

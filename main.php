@@ -44,26 +44,20 @@ echo "<body style='background-color:#E5F5F8'>";
   <div class="row" >
     <div class="col-sm" style="margin: 20px;">
         <a href="subjectRegistration/applySubjectRegistration.php">
-            <img src="images/subjects.png" class="image">
+            <img src="images/subjects.png" class="image"><br>
             <label class="form-label font">Subject Registration Application</label>
         </a>
     </div>
     <div class="col-sm" style="margin: 20px;">
-        <a href="subjectRegistration/viewSubjectRegistration.php">
+        <a href="leave/viewLeave.php">
             <img src="images/leave.png" class="image"><br>
             <label class="form-label font">Incident & Funerary Leave Application</label>
-        </a>
-    </div>
-    <div class="col-sm" style="margin: 20px;">
-        <a href="subjectRegistration/viewSubjectRegistration.php">
-            <img src="images/change.png" class="image"><br>
-            <label class="form-label font">Replacement/ Permanent Change of Class Room Venue/ Time</label>
         </a>
     </div>
     </div>
     <div class="row">
     <div class="col-sm" style="margin: 20px;">
-        <a href="subjectRegistration/viewSubjectRegistration.php">
+        <a href="deferment/viewDeferment.php">
             <img src="images/deferment.png" class="image"><br>
             <label class="form-label font">Deferment/ Withdrawal Application</label>
         </a>
@@ -75,7 +69,7 @@ echo "<body style='background-color:#E5F5F8'>";
         </a>
     </div>
     <div class="col-sm" style="margin: 20px;">
-        <a href="subjectRegistration/viewSubjectRegistration.php">
+        <a href="document/viewDocument.php">
             <img src="images/document.png" class="image"><br>
             <label class="form-label font">Document Application</label>
         </a>

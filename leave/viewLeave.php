@@ -9,7 +9,7 @@ if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'student') {
 
 $userid = $_SESSION['userid'];
 
-$sql1 = "SELECT DISTINCT YEAR(applicationDate) AS year FROM resumption_of_studies_record WHERE applicantID = '$userid'";
+$sql1 = "SELECT DISTINCT YEAR(applicationDate) AS year FROM leave_record WHERE applicantID = '$userid'";
 $result1 = $conn->query($sql1);
 $years = array();
 while ($row1 = $result1->fetch_assoc()) {
@@ -17,7 +17,7 @@ while ($row1 = $result1->fetch_assoc()) {
 }
 sort($years);
 
-$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) IN (10, 11, 12, 1, 2) THEN 3 ELSE 1 END AS latestSem FROM resumption_of_studies_record WHERE applicantID = '$userid'";
+$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) IN (10, 11, 12, 1, 2) THEN 3 ELSE 1 END AS latestSem FROM leave_record WHERE applicantID = '$userid'";
 $result2 = $conn->query($sql2);
 while ($row2 = $result2->fetch_assoc()) {
   $default_year = $row2['latestYear'];
@@ -47,12 +47,11 @@ table,td{
 }
 </style>
 
-
   <div style="margin: 40px;">
     <form  action="" method="post" enctype="multipart/form-data">
       <div class="d-flex justify-content-center">
-      <h3 style="margin-right: 20px">Resumption of Studies Application</h3>
-      <button class="btn btn-primary" type="button" onclick="location.href='applyResumption.php';">Register</button>
+      <h3 style="margin-right: 20px">Incident & Funerary Leave Application</h3>
+      <button class="btn btn-primary" type="button" onclick="location.href='applyLeave.php';">Apply</button>
       </div>
       <div class="row justify-content-center" style="margin: 20px;">
         <label for="year" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Year:</label>
@@ -80,7 +79,7 @@ table,td{
     <table class="table "> 
         <tr>
           <th>No</th>
-          <th>Register ID</th>
+          <th>Application ID</th>
           <th>Date</th>
           <th>Status</th>
         </tr>
@@ -100,55 +99,41 @@ table,td{
         if ($selectedSem == 1) {
           $startMonth = 3; // March
           $endMonth = 5;   // May
-          $sql = "SELECT resumptionID, applicationDate, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature FROM resumption_of_studies_record
-          WHERE YEAR(applicationDate) = '$selectedYear' AND
-          MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid'ORDER BY applicationDate DESC";
+          $sql = "SELECT leaveID, applicationDate, aaroSignature FROM leave_record WHERE YEAR(applicationDate) = '$selectedYear' AND MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
+          applicantID = '$userid' ORDER BY applicationDate DESC";
+
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
-          $sql = "SELECT resumptionID, applicationDate, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature  FROM resumption_of_studies_record
-          WHERE YEAR(applicationDate) = '$selectedYear' AND
-          MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid'ORDER BY applicationDate DESC";
+          $sql = "SELECT leaveID, applicationDate, aaroSignature FROM leave_record WHERE YEAR(applicationDate) = '$selectedYear' AND MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
+          applicantID = '$userid' ORDER BY applicationDate DESC";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT resumptionID, applicationDate, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature  FROM resumption_of_studies_record
-                WHERE YEAR(applicationDate) = '$selectedYear' AND (
-                  (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
-                  (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)
-                )AND
-                applicantID = '$userid' ORDER BY applicationDate DESC";
+          $sql = "SELECT leaveID, applicationDate, aaroSignature FROM leave_record WHERE YEAR(applicationDate) = '$selectedYear' AND ((MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)) AND applicantID = '$userid' ORDER BY applicationDate DESC";
       }
+
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
-            $resumptionID=$row['resumptionID']; 
+            $leaveID=$row['leaveID']; 
             $applicationDate=$row['applicationDate'];
-            $aaroAcknowledge = $row['aaroAcknowledge'];
             $aaroSignature = $row['aaroSignature'];
-            $afoAcknowledge = $row['afoAcknowledge'];
-            $afoSignature = $row['afoSignature'];
-            $deanOrHeadAcknowledge = $row['deanOrHeadAcknowledge'];
-            $deanOrHeadSignature = $row['deanOrHeadSignature'];
                       
-              if ($aaroSignature == 0 || $afoSignature == 0 || $deanOrHeadSignature == 0) {
+              if ($aaroSignature == 0) {
                   $status = 'Pending';
               }
-               elseif ($aaroAcknowledge == 1 && $afoAcknowledge == 1 && $deanOrHeadAcknowledge == 1) {
-                  $status = 'Approved';
-              } else {
-                  $status = 'Disapproved';
+               elseif ($aaroSignature == 1) {
+                  $status = 'Done';
               }
             ?>
         <tr>
           <td class="table-light"><?php echo $rowNumber++; ?></td>
-          <td class="table-light"><?php echo $resumptionID; ?></td>
+          <td class="table-light"><?php echo $leaveID; ?></td>
           <td class="table-light"><?php echo $applicationDate; ?></td>
-          <td class="table-light"><?php if ($status === 'Approved' || $status === 'Disapproved'): ?>
-          <a href="viewResumptionResult.php?resumptionID=<?php echo $resumptionID; ?>"><?php echo $status; ?></a>
-          <?php else: ?><?php echo $status; ?><?php endif; ?></td>
+          <td class="table-light">
+          <a href="viewLeaveResult.php?leaveID=<?php echo $leaveID; ?>"><?php echo $status; ?></a>
+          </td>
          </tr>   
         <?php 
           }
@@ -159,6 +144,5 @@ table,td{
     </table>
     <button name="back" type="button" class="btn btn-secondary" style = "margin:20px;" onclick="back()";>Back</button>
     </div>
-
   </body>
 </html>

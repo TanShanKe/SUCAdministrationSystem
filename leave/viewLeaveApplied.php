@@ -2,17 +2,19 @@
 include '../config.php';
 session_start();
 
-$allowedPositions = ["deanOrHod", "aaro", "afo"];
+
+$allowedPositions = ["lecturer", "aaro"];
 if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
   
   exit();
 }
 
+
 $userid = $_SESSION['userid'];
 $position = $_SESSION['position'];
 
-$sql1 = "SELECT DISTINCT YEAR(applicationDate) AS year FROM resumption_of_studies_record";
+$sql1 = "SELECT DISTINCT YEAR(applicationDate) AS year FROM leave_record";
 $result1 = $conn->query($sql1);
 $years = array();
 while ($row = $result1->fetch_assoc()) {
@@ -20,7 +22,7 @@ while ($row = $result1->fetch_assoc()) {
 }
 sort($years);
 
-$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) IN (10, 11, 12, 1, 2) THEN 3 ELSE 1 END AS latestSem FROM resumption_of_studies_record";
+$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) IN (10, 11, 12, 1, 2) THEN 3 ELSE 1 END AS latestSem FROM leave_record";
 $result2 = $conn->query($sql2);
 while ($row = $result2->fetch_assoc()) {
   $default_year = $row['latestYear'];
@@ -34,7 +36,12 @@ echo "<body style='background-color:#E5F5F8'>";
 <script>
   var baseUrl = '../';
   function back() {
-    location.href = '../adminMain.php';
+    <?php if ($position == 'lecturer') { ?>
+      location.href = '../lecturerMain.php';
+    <?php } ?>
+    <?php if ($position == 'aaro') { ?>
+      location.href = '../adminMain.php';
+    <?php } ?>
   }
 </script>
 
@@ -49,13 +56,11 @@ table,td{
   border-color: black;
 }
 </style>
-
-<div class="row">
-  <div class="col" style="margin: 40px;">
+<div style="margin: 40px;">
+    <div class="d-flex justify-content-center">
+        <h3 style="margin-right: 20px">Student Incident & Funerary Leave Application</h3>
+    </div>
     <form  action="" method="post" enctype="multipart/form-data">
-      <div class="d-flex justify-content-center">
-      <h3 style="margin-right: 20px">Resumption of Studies Application</h3>
-      </div>
       <div class="row justify-content-center" style="margin: 20px;">
         <label for="year" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Year:</label>
         <select name="selected_year" id="selected_year" style="margin-right: 30px;">
@@ -74,20 +79,14 @@ table,td{
         <label for="status" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Status:</label>
         <select name="selected_status" id="selected_status" style="margin-right: 30px;">
           <option value="">All</option>
-          <option value="approval" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'approval') echo 'selected="selected"'; ?>>Approval</option>
+          <option value="acknowledge" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'acknowledge') echo 'selected="selected"'; ?>>Acknowledge</option>
           <option value="completed" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'completed') echo 'selected="selected"'; ?>>Completed</option>
-          <?php
-            if ($position == 'aaro') {
-              // Add the 'AllDone' option for AARO
-              echo '<option value="alldone"';
-              if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'alldone') {
-                echo ' selected="selected"';
-              }
-              echo '>AllDone</option>';
-            }
-          ?>
         </select>
         <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+        </div>
+        <div class="row justify-content-center" style="margin: 20px;">
+        <input name="keyword" type="search" style="margin-right: 20px;" placeholder="Search" >
+        <button name="search" class="btn btn-outline-secondary" type="submit">Search</button>
       </div>
     </form>
   </div>
@@ -98,19 +97,19 @@ table,td{
     <table class="table "> 
         <tr>
           <th>No</th>
-          <th>Register ID</th>
-          <th>Applicant ID</th>
+          <th>Application ID</th>
+          <th>Student ID</th>
           <th>Date</th>
           <th>Status</th>
         </tr>
         <?php
 
-        if (!isset($_POST['selected_year']) || !isset($_POST['selected_sem']) || !isset($_POST['selected_status'])) {
-          $rowNumber = 1;
-          $selectedYear = $default_year;
-          $selectedSem = $default_sem;
-          $selectedStatus = '';
-        }else{
+        $rowNumber = 1;
+        $selectedYear = $default_year;
+        $selectedSem = $default_sem;
+        $selectedStatus = '';
+
+        if (isset($_POST['check'])) {
           $rowNumber = 1;
           $selectedYear = $_POST['selected_year'];
           $selectedSem = $_POST['selected_sem'];
@@ -120,48 +119,49 @@ table,td{
         if ($selectedSem == 1) {
           $startMonth = 3; // March
           $endMonth = 5;   // May
-          $sql = "SELECT resumptionID, applicationDate, applicantID, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature FROM resumption_of_studies_record
-          WHERE YEAR(applicationDate) = '$selectedYear' AND
+          $sql = " SELECT lecturerSignature, leave_record.applicantID, leave_record.leaveID, leave_record.applicationDate, leave_record.aaroSignature  FROM leave_subject LEFT JOIN leave_record on leave_subject.leaveID=leave_record.leaveID  WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth";
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
-          $sql = "SELECT resumptionID, applicationDate, applicantID, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature  FROM resumption_of_studies_record
-          WHERE YEAR(applicationDate) = '$selectedYear' AND
+          $sql = "SELECT lecturerSignature, leave_record.applicantID, leave_record.leaveID, leave_record.applicationDate, leave_record.aaroSignature  FROM leave_subject LEFT JOIN leave_record on leave_subject.leaveID=leave_record.leaveID   WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT resumptionID, applicationDate, applicantID, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature FROM resumption_of_studies_record
-                WHERE YEAR(applicationDate) = '$selectedYear' AND (
-                  (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
-                  (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth))";
+          $sql = "SELECT lecturerSignature, leave_record.applicantID, leave_record.leaveID, leave_record.applicationDate, leave_record.aaroSignature FROM leave_subject LEFT JOIN leave_record on leave_subject.leaveID=leave_record.leaveID WHERE YEAR(applicationDate) = '$selectedYear' AND ((MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth))";
       }
 
-      if ($position == 'deanOrHod') {
-        if ($selectedStatus == 'approval') {
-          $sql .= " AND deanOrHeadSignature = 0 ";
+      $keyword="";
+      if (isset($_POST['search']) && !empty($_POST['keyword'])) {
+        $rowNumber = 1;
+        $k=$_POST['keyword'];
+        $keyword=" where (leave_subject.leaveID like '%".$k."%' or leave_record.applicantID like '%".$k."%')";  
+        $sql = "SELECT lecturerSignature, leave_record.applicantID, leave_record.leaveID, leave_record.applicationDate, leave_record.aaroSignature FROM leave_subject LEFT JOIN leave_record on leave_subject.leaveID=leave_record.leaveID".$keyword;
+      }else if (isset($_POST['search']) && empty($_POST['keyword'])) {
+        echo '<script type="text/javascript">
+        alert("Please insert application id to search!");
+        </script>';
+      }
+
+      if ($position == 'lecturer') {
+        $sql .= " AND leave_subject.lecturerID = '$userid'";
+        if ($selectedStatus == 'acknowledge') {
+        $sql .= " AND lecturerSignature = 0";
         }elseif($selectedStatus == 'completed'){
-          $sql .= " AND deanOrHeadSignature = 1";
+        $sql .= " AND lecturerSignature = 1";
         }
+        $sql .= " GROUP BY leave_record.leaveID ";
       }
 
       if ($position == 'aaro') {
-        $sql .= " AND afoSignature = 1 AND deanOrHeadSignature = 1";
-        if ($selectedStatus == 'approval') {
+        if ($selectedStatus == 'acknowledge') {
           $sql .= " AND aaroSignature = 0 ";
         }elseif($selectedStatus == 'completed'){
           $sql .= " AND aaroSignature = 1";
         }
-      }
-
-      if ($position == 'afo') {
-        $sql .= " AND deanOrHeadSignature = 1";
-        if ($selectedStatus == 'approval') {
-          $sql .= " AND afoSignature = 0 ";
-        }elseif($selectedStatus == 'completed'){
-          $sql .= " AND afoSignature = 1";
-        }
+        $sql .= " GROUP BY leave_record.leaveID HAVING
+        SUM(CASE WHEN leave_subject.lecturerSignature = 0 OR leave_subject.lecturerSignature IS NULL THEN 1 ELSE 0 END) = 0";
       }
 
       $sql .= " ORDER BY applicationDate DESC";
@@ -169,60 +169,44 @@ table,td{
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
-            $resumptionID=$row['resumptionID']; 
+            $leaveID=$row['leaveID']; 
             $applicationDate=$row['applicationDate'];
             $applicantID=$row['applicantID'];
-            $aaroAcknowledge = $row['aaroAcknowledge'];
             $aaroSignature = $row['aaroSignature'];
-            $afoAcknowledge = $row['afoAcknowledge'];
-            $afoSignature = $row['afoSignature'];
-            $deanOrHeadAcknowledge = $row['deanOrHeadAcknowledge'];
-            $deanOrHeadSignature = $row['deanOrHeadSignature'];
+            $lecturerSignature = $row['lecturerSignature'];
 
-              if($position == 'deanOrHod'){
-                if($deanOrHeadSignature == 0){
-                  $status = 'Approval';
+              if($position == 'lecturer'){
+                if($lecturerSignature == 0){
+                  $status = 'Acknowledge';
                 }else{
                   $status = 'Completed';
                 }
+                
               } elseif($position =='aaro'){
                 if($aaroSignature == 0){
-                  $status = 'Approval';
+                  $status = 'Acknowledge';
                 }else{
                   $status = 'Completed';
                 }
-                if($deanOrHeadSignature == 1 && $aaroSignature == 1 && $afoSignature == 1){
-                  $status = 'AllDone';
-                }
-              } elseif($position =='afo'){
-                if($afoSignature == 0){
-                  $status = 'Approval';
-                }else{
-                  $status = 'Completed';
-                }
-              } 
-                    
+              }                    
             ?>
         <tr>
           <td class="table-light"><?php echo $rowNumber++; ?></td>
-          <td class="table-light"><?php echo $resumptionID; ?></td>
+          <td class="table-light"><?php echo $leaveID; ?></td>
           <td class="table-light"><?php echo $applicantID; ?></td>
           <td class="table-light"><?php echo $applicationDate; ?></td>
           <td class="table-light">
-          <a href="reviewResumption.php?resumptionID=<?php echo $resumptionID; ?>&status=<?php echo $status; ?>"><?php echo $status; ?></a>
+          <a href="reviewLeave.php?leaveID=<?php echo $leaveID; ?>&status=<?php echo $status; ?>"><?php echo $status; ?></a>
           </td>
          </tr>   
         <?php 
           }
         }else{
-          ?><tr><td class="table-light" colspan="5"><center>No application is done in this semester!</center></td></tr><?php
+          ?><tr><td class="table-light" colspan="5"><center>No application is found!</center></td></tr><?php
         }
         ?> 
     </table>
     <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
-    </div>
-  </div>
-
+      </div>
   </body>
 </html>
-

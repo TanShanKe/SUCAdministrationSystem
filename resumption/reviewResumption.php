@@ -3,22 +3,25 @@ include '../config.php';
 
 session_start();
 
+//Must login to access this page
 if (!isset($_SESSION['userid'])) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
 }
 
-$allowedPositions = ["deanOrHod", "aaro", "afo"];
+//Only dean or hod & aaro & afo can access this page
+$allowedPositions = ["deanOrHod", "aaro"];
 if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
   exit();
 }
 
+//Get info from previous page
 $resumptionID = $_GET['resumptionID'];
 $status = $_GET['status'];
 $userid = $_SESSION['userid'];
 $position = $_SESSION['position'];
 
-//select the applicant details
+//Get the applicant info
 $sql1 = "SELECT student.name AS name, student.batchNo AS batchNo, applicantID, applicationDate, yearOfResumption, semOfResumption, yearOfDeferment, semOfDeferment FROM resumption_of_studies_record left join student on resumption_of_studies_record.applicantID=student.studentID WHERE resumptionID = '$resumptionID'";
 
 $result1 = $conn->query($sql1);
@@ -36,7 +39,7 @@ if ($result1->num_rows > 0) {
   }
 }            
 
-//check is the temporary data exist
+//Check is the temporary data exist
 $sql = "SELECT * FROM resumption_temporary WHERE id = '$resumptionID'";
 $resultTemp = $conn->query($sql);
 
@@ -51,7 +54,7 @@ if ($resultTemp->num_rows > 0) {
 }
 
 
-//temporary data
+//Save temporary data
 if (isset($_POST['save'])) {
   $resumptionID = $_POST['resumptionID'];
   $tempDecision = $_POST['decision'];
@@ -74,7 +77,7 @@ if (isset($_POST['save'])) {
       $tempAfoAcknowledge = $row['afoAcknowledge']; 
       $tempAfoComment = $row['afoComment']; 
 
-          // Check if you're updating an existing temporary record
+      // Check if updating an existing temporary record
       if ($position == 'deanOrHod') {
         $sql = "UPDATE resumption_temporary
                 SET deanOrHeadAcknowledge = '$tempAckResult',
@@ -121,6 +124,8 @@ if (isset($_POST['save'])) {
   }
 }
 
+ 
+  // Submit the review data
   if(isset($_POST['submit'])){
     $resumptionID = $_POST['resumptionID'];
 
@@ -242,9 +247,119 @@ table,td{
       if($position == 'deanOrHod'){
         echo '<label class="form-label" style="margin-top: 30px; margin-left: 20px; font-size: 110%"><b>Faculty (Head of Department / Dean) Use</b></label>';
       } elseif($position =='aaro'){
+
+        //Get review details of dean/hod
+        echo '<label for="" class="form-label" >Faculty (Head of Department / Dean)</label>';
+        $sql1 = "SELECT lecturer.name AS name, deanOrHeadID AS id, deanOrHeadAcknowledge AS decision, deanOrHeadComment AS comment, deanOrHeadAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join lecturer on resumption_of_studies_record.deanOrHeadID=lecturer.lecturerID WHERE resumptionID = '$resumptionID'";
+        $result1 = $conn->query($sql1);
+
+        if ($result1->num_rows > 0) {
+          while ($row = $result1->fetch_assoc()) {
+            $name=$row['name'];
+            $id=$row['id'];
+            $decision=$row['decision'];
+            $comment=$row['comment'];
+            $acknowledgeDate=$row['acknowledgeDate'];
+            if($decision == 1){
+              $acknowledge = 'Acknowledge';
+            }elseif($decision == 0){
+              $acknowledge = 'Not Acknowledge';
+            }
+          }
+          ?>
+
+        <table class="table">  
+          <tr>
+            <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+            <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $acknowledgeDate; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
+          </tr> 
+      </table> <?php
+        }
+
+        //get review details of afo
+        echo '<label for="" class="form-label" >Account & Finance Office</label>';
+        $sql3 = "SELECT administrator.name AS name, afoID AS id, afoAcknowledge AS decision, afoComment AS comment, afoAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.afoID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
+        $result3 = $conn->query($sql3);
+      
+        if ($result3->num_rows > 0) {
+          while ($row = $result3->fetch_assoc()) {
+            $name=$row['name'];
+            $id=$row['id'];
+            $decision=$row['decision'];
+            $comment=$row['comment'];
+            $acknowledgeDate=$row['acknowledgeDate'];
+            if($decision == 1){
+              $acknowledge = 'Acknowledge';
+            }elseif($decision == 0){
+              $acknowledge = 'Not Acknowledge';
+            }
+          }
+          ?>
+
+        <table class="table">  
+          <tr>
+            <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+            <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $acknowledgeDate; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
+          </tr> 
+      </table>
+      <?php
+        }
+
         echo '<label class="form-label" style="margin-top: 30px;margin-left: 20px; font-size: 110%"><b>Academic Affairs & Registration Office Use</b></label>';  
       } elseif($position =='afo'){
+
+        //get review details of dean/hod
+        echo '<label for="" class="form-label" >Faculty (Head of Department / Dean)</label>';
+        $sql1 = "SELECT lecturer.name AS name, deanOrHeadID AS id, deanOrHeadAcknowledge AS decision, deanOrHeadComment AS comment, deanOrHeadAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join lecturer on resumption_of_studies_record.deanOrHeadID=lecturer.lecturerID WHERE resumptionID = '$resumptionID'";
+        $result1 = $conn->query($sql1);
+
+        if ($result1->num_rows > 0) {
+          while ($row = $result1->fetch_assoc()) {
+            $name=$row['name'];
+            $id=$row['id'];
+            $decision=$row['decision'];
+            $comment=$row['comment'];
+            $acknowledgeDate=$row['acknowledgeDate'];
+            if($decision == 1){
+              $acknowledge = 'Acknowledge';
+            }elseif($decision == 0){
+              $acknowledge = 'Not Acknowledge';
+            }
+          }
+          ?>
+
+          //print review details of dean/hod
+        <table class="table">  
+          <tr>
+            <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+            <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $acknowledgeDate; ?></td>
+          </tr> 
+          <tr>
+            <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
+          </tr> 
+      </table> <?php
+        }
+
         echo '<label class="form-label" style="margin-top: 30px; margin-left: 20px; font-size: 110%"><b>Account & Finance Office Use</b></label>';
+      
       }
         ?>
       <form  action="reviewResumption.php" method="post" enctype="multipart/form-data">
@@ -302,15 +417,15 @@ table,td{
     }elseif($status == 'Completed'){ 
       if($position == 'deanOrHod'){ 
         echo '<label for="" class="form-label" >Faculty (Head of Department / Dean)</label>';
-        $sql = "SELECT lecturer.name AS name, deanOrHeadID AS id, deanOrHeadAcknowledge AS decision, deanOrHeadComment AS comment, deanOrHeadAcknowledgeDate AS acknoewledgeDate FROM resumption_of_studies_record left join lecturer on resumption_of_studies_record.deanOrHeadID=lecturer.lecturerID WHERE resumptionID = '$resumptionID'";
+        $sql = "SELECT lecturer.name AS name, deanOrHeadID AS id, deanOrHeadAcknowledge AS decision, deanOrHeadComment AS comment, deanOrHeadAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join lecturer on resumption_of_studies_record.deanOrHeadID=lecturer.lecturerID WHERE resumptionID = '$resumptionID'";
         $result = $conn->query($sql);
       }elseif($position == 'aaro'){
         echo '<label for="" class="form-label" >Academic Affairs & Registration Office</label>';
-        $sql = "SELECT administrator.name AS name, aaroID AS id, aaroAcknowledge AS decision, aaroComment AS comment, aaroAcknowledgeDate AS acknoewledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.aaroID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
+        $sql = "SELECT administrator.name AS name, aaroID AS id, aaroAcknowledge AS decision, aaroComment AS comment, aaroAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.aaroID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
         $result = $conn->query($sql);
       }elseif($position == 'afo'){
         echo '<label for="" class="form-label" >Account & Finance Office</label>';
-        $sql = "SELECT administrator.name AS name, afoID AS id, afoAcknowledge AS decision, afoComment AS comment, afoAcknowledgeDate AS acknoewledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.afoID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
+        $sql = "SELECT administrator.name AS name, afoID AS id, afoAcknowledge AS decision, afoComment AS comment, afoAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.afoID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
         $result = $conn->query($sql);
       }    
 
@@ -320,7 +435,7 @@ table,td{
           $id=$row['id'];
           $decision=$row['decision'];
           $comment=$row['comment'];
-          $acknoewledgeDate=$row['acknoewledgeDate'];
+          $acknowledgeDate=$row['acknowledgeDate'];
           if($decision == 1){
             $acknowledge = 'Acknowledge';
           }elseif($decision == 0){
@@ -335,7 +450,7 @@ table,td{
         </tr> 
         <tr>
           <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
-          <th class="thReview">Date</th><td class="table-light"><?php echo $acknoewledgeDate; ?></td>
+          <th class="thReview">Date</th><td class="table-light"><?php echo $acknowledgeDate; ?></td>
         </tr> 
         <tr>
           <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
@@ -346,7 +461,7 @@ table,td{
       } 
     } elseif($status == 'AllDone'){
         echo '<label for="" class="form-label" >Faculty (Head of Department / Dean)</label>';
-        $sql1 = "SELECT lecturer.name AS name, deanOrHeadID AS id, deanOrHeadAcknowledge AS decision, deanOrHeadComment AS comment, deanOrHeadAcknowledgeDate AS acknoewledgeDate FROM resumption_of_studies_record left join lecturer on resumption_of_studies_record.deanOrHeadID=lecturer.lecturerID WHERE resumptionID = '$resumptionID'";
+        $sql1 = "SELECT lecturer.name AS name, deanOrHeadID AS id, deanOrHeadAcknowledge AS decision, deanOrHeadComment AS comment, deanOrHeadAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join lecturer on resumption_of_studies_record.deanOrHeadID=lecturer.lecturerID WHERE resumptionID = '$resumptionID'";
         $result1 = $conn->query($sql1);
 
         if ($result1->num_rows > 0) {
@@ -380,7 +495,7 @@ table,td{
         } 
         
         echo '<label for="" class="form-label" >Academic Affairs & Registration Office</label>';
-        $sql2 = "SELECT administrator.name AS name, aaroID AS id, aaroAcknowledge AS decision, aaroComment AS comment, aaroAcknowledgeDate AS acknoewledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.aaroID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
+        $sql2 = "SELECT administrator.name AS name, aaroID AS id, aaroAcknowledge AS decision, aaroComment AS comment, aaroAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.aaroID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
         $result2 = $conn->query($sql2);
 
         if ($result2->num_rows > 0) {
@@ -389,7 +504,7 @@ table,td{
             $id=$row['id'];
             $decision=$row['decision'];
             $comment=$row['comment'];
-            $acknoewledgeDate=$row['acknoewledgeDate'];
+            $acknowledgeDate=$row['acknowledgeDate'];
             if($decision == 1){
               $acknowledge = 'Acknowledge';
             }elseif($decision == 0){
@@ -404,7 +519,7 @@ table,td{
           </tr> 
           <tr>
             <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
-            <th class="thReview">Date</th><td class="table-light"><?php echo $acknoewledgeDate; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $acknowledgeDate; ?></td>
           </tr> 
           <tr>
             <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
@@ -414,7 +529,7 @@ table,td{
         } 
 
         echo '<label for="" class="form-label" >Account & Finance Office</label>';
-        $sql3 = "SELECT administrator.name AS name, afoID AS id, afoAcknowledge AS decision, afoComment AS comment, afoAcknowledgeDate AS acknoewledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.afoID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
+        $sql3 = "SELECT administrator.name AS name, afoID AS id, afoAcknowledge AS decision, afoComment AS comment, afoAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.afoID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
         $result3 = $conn->query($sql3);
       
         if ($result3->num_rows > 0) {
@@ -423,7 +538,7 @@ table,td{
             $id=$row['id'];
             $decision=$row['decision'];
             $comment=$row['comment'];
-            $acknoewledgeDate=$row['acknoewledgeDate'];
+            $acknowledgeDate=$row['acknowledgeDate'];
             if($decision == 1){
               $acknowledge = 'Acknowledge';
             }elseif($decision == 0){
@@ -438,7 +553,7 @@ table,td{
           </tr> 
           <tr>
             <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
-            <th class="thReview">Date</th><td class="table-light"><?php echo $acknoewledgeDate; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $acknowledgeDate; ?></td>
           </tr> 
           <tr>
             <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
