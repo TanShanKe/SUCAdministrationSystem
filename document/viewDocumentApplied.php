@@ -140,7 +140,7 @@ table,td{
       if (isset($_POST['search']) && !empty($_POST['keyword'])) {
         $rowNumber = 1;
         $k=$_POST['keyword'];
-        $keyword=" where documentID like '%".$k."%' ";  
+        $keyword=" where (documentID like '%".$k."%' OR applicantID like '%".$k."%')";  
         $sql = "SELECT document_record.documentID, applicantID, applicationDate, afoDecision, afoSignature, officialReceipt, updateApplicantSignature, collectionStatus FROM document_record ".$keyword;
       }
 

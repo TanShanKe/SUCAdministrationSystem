@@ -89,6 +89,10 @@ table,td{
         </select>
         <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
       </div>
+      <div class="row justify-content-center" style="margin: 20px;">
+        <input name="keyword" type="search" style="margin-right: 20px;" placeholder="Search" >
+        <button name="search" class="btn btn-outline-secondary" type="submit">Search</button>
+      </div>
     </form>
   </div>
 </div>
@@ -136,6 +140,20 @@ table,td{
                 WHERE YEAR(applicationDate) = '$selectedYear' AND (
                   (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
                   (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth))";
+      }
+
+      $keyword="";
+      if (isset($_POST['search']) && !empty($_POST['keyword'])) {
+        $rowNumber = 1;
+        $k=$_POST['keyword'];
+        $keyword=" WHERE (resumptionID like '%".$k."%' OR applicantID like '%".$k."%')";  
+        $sql = "SELECT resumptionID, applicationDate, applicantID, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature FROM resumption_of_studies_record".$keyword;
+      }
+
+      if (isset($_POST['search']) && empty($_POST['keyword'])) {
+        echo '<script type="text/javascript">
+        alert("Please insert application id or applicant id to search!");
+        </script>';
       }
 
       if ($position == 'deanOrHod') {
@@ -215,7 +233,7 @@ table,td{
         <?php 
           }
         }else{
-          ?><tr><td class="table-light" colspan="5"><center>No application is done in this semester!</center></td></tr><?php
+          ?><tr><td class="table-light" colspan="5"><center>No application is found!</center></td></tr><?php
         }
         ?> 
     </table>

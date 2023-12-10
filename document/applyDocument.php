@@ -35,6 +35,8 @@ if(isset($_POST['apply'])){
    }  
   $applicationDate=date("Y-m-d"); 
 
+  $reason=$_POST['reason'];
+
   $target_dir = "uploads/paymentSlip/";
   $totalfiles = count($_FILES['paymentSlip']['name']);
 
@@ -56,7 +58,7 @@ if(isset($_POST['apply'])){
 
   }
 
-        $sql = "INSERT INTO document_record (documentID, document, applicantID, applicantSignature, applicationDate) VALUES ('$generatedId', '$chk', '$userid', '1', '$applicationDate')";
+        $sql = "INSERT INTO document_record (documentID, document, reason, applicantID, applicantSignature, applicationDate) VALUES ('$generatedId', '$chk', '$reason', '$userid', '1', '$applicationDate')";
         $result=$conn->query($sql);
 
         if ($result === TRUE) {
@@ -84,12 +86,17 @@ echo "<body style='background-color:#E5F5F8'>";
   }
 
   function updateValue() {
-    var documentText = document.getElementById("certOthers").value;
-    document.getElementById("certOthersCheckbox").value = documentText;
-    var documentText = document.getElementById("others").value;
-    document.getElementById("othersCheckbox").value = documentText;
-    var documentText = document.getElementById("year").value + document.getElementById("sem").value;
-    document.getElementById("yearsemSelect").value = "Semester Academic Record " + documentText;
+    var documentText1 = document.getElementById("certOthers").value;
+    document.getElementById("certOthersCheckbox").value = documentText1;
+    var documentText2 = document.getElementById("others").value;
+    document.getElementById("othersCheckbox").value = documentText2;
+    var documentText3 = document.getElementById("year").value + document.getElementById("sem").value;
+    document.getElementById("yearsemSelect").value = "Semester Academic Record " + documentText3;
+    var documentText4 = document.getElementById("copies").value;
+    document.getElementById("copiesCheckbox").value = "Syllabus " + documentText4 + " copies";
+    var documentText5 = document.getElementById("number").value;
+    var documentText6 = document.getElementById("subjects").value;
+    document.getElementById("numberCheckbox").value = "Syllabus " + documentText5 + " subject  (Course Applied : " + documentText6 + ")";
   }
 </script>
 
@@ -167,16 +174,16 @@ echo "<body style='background-color:#E5F5F8'>";
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;"><b>Syllabus: </b></label>
-        <input type="checkbox" name="documents[]" value="" style="margin-right: 10px;">
-        <input type="text" id="document" name="document">
+        <input type="checkbox" name="documents[]" value="" id="copiesCheckbox" style="margin-right: 10px;">
+        <input type="text" id="copies" name="copies" onkeyup="updateValue()">
         <p style="margin: 7px;  margin-top: 5px;">copies (@RM35)</p>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
-        <input type="checkbox" name="documents[]" value="" style="margin-right: 10px;  margin-left: 60px;">
-        <input type="text" id="document" name="document">
+        <input type="checkbox" name="documents[]" value="" id="numberCheckbox" style="margin-right: 10px;  margin-left: 60px;">
+        <input type="text" id="number" name="number" onkeyup="updateValue()">
         <p style="margin: 7px; margin-top: 5px;">subject (@RM15)</p> 
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 10px;">Course/Subject Applied:</label>
-        <input type="text" id="document" name="document">
+        <input type="text" id="subjects" name="subjects" onkeyup="updateValue()">
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px; margin-top: 20px;">
         <input type="checkbox" name="documents[]" value="Student ID card for status verification at semester final examination" style="margin-right: 10px; margin-bottom: 12px;">
@@ -185,7 +192,11 @@ echo "<body style='background-color:#E5F5F8'>";
       <div class="row" style="margin: 10px; margin-left: 20px;">
         <input type="checkbox" name="documents[]" value="" id="certOthersCheckbox" style="margin-right: 10px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;"><b>Others: </b></label>
-        <input type="text" id="certOthers" name="certOthers" onkeyup="updateCheckboxValue()">
+        <input type="text" id="certOthers" name="certOthers" onkeyup="updateValue()">
+      </div>
+      <div class="row" style="margin: 20px;">
+      <label for="reason" id="reason"class="form-label" style="margin-top: 5px; margin-right: 30px;">Reason(s):</label>
+        <textarea class="form-control" placeholder="Leave your reason here" name="reason" id="reason" required></textarea>
       </div>
       <div class="row" style="margin: 20px; margin-top:30px; margin-bottom:0px;">
         <label for="paymentSlip" id="paymentSlip"class="form-label" style="margin-top: 5px; margin-right: 30px;">Payment Slip: </label>

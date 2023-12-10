@@ -2,7 +2,7 @@
 include '../config.php';
 session_start();
 
-$allowedPositions = ["deanOrHod", "aaro", "afo", "library", "sao", "iso", "sro"];
+$allowedPositions = ["deanOrHod", "aaro", "afo", "lib", "sao", "iso", "sro"];
 if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
   
@@ -73,10 +73,14 @@ table,td{
         <label for="status" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Status:</label>
         <select name="selected_status" id="selected_status" style="margin-right: 30px;">
           <option value="">All</option>
-          <option value="approval" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'review') echo 'selected="selected"'; ?>>Review</option>
+          <option value="review" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'review') echo 'selected="selected"'; ?>>Review</option>
           <option value="completed" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'completed') echo 'selected="selected"'; ?>>Completed</option>
         </select>
         <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+      </div>
+      <div class="row justify-content-center" style="margin: 20px;">
+        <input name="keyword" type="search" style="margin-right: 20px;" placeholder="Search" >
+        <button name="search" class="btn btn-outline-secondary" type="submit">Search</button>
       </div>
     </form>
   </div>
@@ -119,22 +123,36 @@ table,td{
         if ($selectedSem == 1) {
           $startMonth = 3; // March
           $endMonth = 5;   // May
-          $sql = "SELECT defermentID, applicationDate, applicantID, isoSignature, saoSignature, counselingSignature, sroSignature, librarySignature, afoSignature, hodSignature, aaroSignature, registrarSignature, student.type FROM deferment_record LEFT JOIN student ON deferment_record.applicantID=student.studentID
+          $sql = "SELECT defermentID, applicationDate, applicantID, isoSignature, saoSignature, counselingSignature, sroSignature, libSignature, afoSignature, hodSignature, aaroSignature, registrarSignature, student.type, student.hostel FROM deferment_record LEFT JOIN student ON deferment_record.applicantID=student.studentID
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth";
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
-          $sql = "SELECT defermentID, applicationDate, applicantID, isoSignature, saoSignature, counselingSignature, sroSignature, librarySignature, afoSignature, hodSignature, aaroSignature, registrarSignature, student.type FROM deferment_record LEFT JOIN student ON deferment_record.applicantID=student.studentID
+          $sql = "SELECT defermentID, applicationDate, applicantID, isoSignature, saoSignature, counselingSignature, sroSignature, libSignature, afoSignature, hodSignature, aaroSignature, registrarSignature, student.type, student.hostel FROM deferment_record LEFT JOIN student ON deferment_record.applicantID=student.studentID
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT defermentID, applicationDate, applicantID, isoSignature, saoSignature, counselingSignature, sroSignature, librarySignature, afoSignature, hodSignature, aaroSignature, registrarSignature, student.type FROM deferment_record LEFT JOIN student ON deferment_record.applicantID=student.studentID
+          $sql = "SELECT defermentID, applicationDate, applicantID, isoSignature, saoSignature, counselingSignature, sroSignature, libSignature, afoSignature, hodSignature, aaroSignature, registrarSignature, student.type, student.hostel FROM deferment_record LEFT JOIN student ON deferment_record.applicantID=student.studentID
                 WHERE YEAR(applicationDate) = '$selectedYear' AND (
                   (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
                   (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth))";
+      }
+
+      $keyword="";
+      if (isset($_POST['search']) && !empty($_POST['keyword'])) {
+        $rowNumber = 1;
+        $k=$_POST['keyword'];
+        $keyword=" WHERE (defermentID like '%".$k."%' OR applicantID like '%".$k."%')";  
+        $sql = "SELECT defermentID, applicationDate, applicantID, isoSignature, saoSignature, counselingSignature, sroSignature, libSignature, afoSignature, hodSignature, aaroSignature, registrarSignature, student.type, student.hostel FROM deferment_record LEFT JOIN student ON deferment_record.applicantID=student.studentID ".$keyword;
+      }
+
+      if (isset($_POST['search']) && empty($_POST['keyword'])) {
+        echo '<script type="text/javascript">
+        alert("Please insert application id or applicant id to search!");
+        </script>';
       }
 
       if ($position == 'iso') {
@@ -145,46 +163,46 @@ table,td{
           $sql .= " AND isoSignature = 1";
         }
       } elseif ($position == 'sao') {
-        $sql .= " AND  (isoSignature = 1 AND student.type = 'International') || (isoSignature = 0 AND student.type = 'Local') ";
+        $sql .= " AND  ((isoSignature = 1 AND student.type = 'International') OR (isoSignature = 0 AND student.type = 'Local')) ";
         if ($selectedStatus == 'review') {
-          $sql .= " AND saoSignature = 0 || counselingSignature = 0";
+          $sql .= " AND (saoSignature = 0 OR counselingSignature = 0)";
         }elseif($selectedStatus == 'completed'){
-          $sql .= " AND saoSignature = 1  || counselingSignature = 1";
+          $sql .= " AND (saoSignature = 1  OR counselingSignature = 1)";
         }
       } elseif ($position == 'sro') {
-        $sql .= " AND  (isoSignature = 1 AND student.type = 'International') || (isoSignature = 0 AND student.type = 'Local') AND saoSignature = 1 AND counselingSignature = 1 ";
+        $sql .= " AND student.hostel = 1 AND  ((isoSignature = 1 AND student.type = 'International') OR (isoSignature = 0 AND student.type = 'Local')) AND (saoSignature = 1 AND counselingSignature = 1) ";
         if ($selectedStatus == 'review') {
           $sql .= " AND sroSignature = 0";
         }elseif($selectedStatus == 'completed'){
           $sql .= " AND sroSignature = 1";
         }
-      } elseif ($position == 'library') {
-        $sql .= " AND  (isoSignature = 1 AND student.type = 'International') || (isoSignature = 0 AND student.type = 'Local') AND saoSignature = 1 AND counselingSignature = 1 AND sroSignature = 1";
+      } elseif ($position == 'lib') {
+        $sql .= " AND  ((isoSignature = 1 AND student.type = 'International') OR (isoSignature = 0 AND student.type = 'Local')) AND saoSignature = 1 AND counselingSignature = 1 AND ((sroSignature = 1 AND student.hostel = 1) OR (sroSignature = 0 AND student.hostel = 0))";
         if ($selectedStatus == 'review') {
-          $sql .= " AND librarySignature = 0 ";
+          $sql .= " AND libSignature = 0 ";
         }elseif($selectedStatus == 'completed'){
-          $sql .= " AND librarySignature = 1";
+          $sql .= " AND libSignature = 1";
         }
       } elseif ($position == 'afo') {
-        $sql .= " AND  (isoSignature = 1 AND student.type = 'International') || (isoSignature = 0 AND student.type = 'Local') AND saoSignature = 1 AND counselingSignature = 1 AND sroSignature = 1 AND librarySignature ";
+        $sql .= " AND  ((isoSignature = 1 AND student.type = 'International') OR (isoSignature = 0 AND student.type = 'Local')) AND saoSignature = 1 AND counselingSignature = 1 AND ((sroSignature = 1 AND student.hostel = 1) OR (sroSignature = 0 AND student.hostel = 0)) AND libSignature ";
         if ($selectedStatus == 'review') {
           $sql .= " AND afoSignature = 0 ";
         }elseif($selectedStatus == 'completed'){
           $sql .= " AND afoSignature = 1";
         }
       } elseif ($position == 'deanOrHod') {
-        $sql .= " AND  (isoSignature = 1 AND student.type = 'International') || (isoSignature = 0 AND student.type = 'Local') AND saoSignature = 1 AND counselingSignature = 1 AND sroSignature = 1 AND librarySignature AND afoSignature ";
+        $sql .= " AND  ((isoSignature = 1 AND student.type = 'International') OR (isoSignature = 0 AND student.type = 'Local')) AND saoSignature = 1 AND counselingSignature = 1 AND ((sroSignature = 1 AND student.hostel = 1) OR (sroSignature = 0 AND student.hostel = 0)) AND libSignature AND afoSignature ";
         if ($selectedStatus == 'review') {
           $sql .= " AND hodSignature = 0 ";
         }elseif($selectedStatus == 'completed'){
           $sql .= " AND hodSignature = 1";
         }
       } elseif ($position == 'aaro') {
-        $sql .= " AND  (isoSignature = 1 AND student.type = 'International') || (isoSignature = 0 AND student.type = 'Local') AND saoSignature = 1 AND counselingSignature = 1 AND sroSignature = 1 AND librarySignature AND afoSignature AND hodSignature = 1";
+        $sql .= " AND  ((isoSignature = 1 AND student.type = 'International') OR (isoSignature = 0 AND student.type = 'Local')) AND saoSignature = 1 AND counselingSignature = 1 AND ((sroSignature = 1 AND student.hostel = 1) OR (sroSignature = 0 AND student.hostel = 0)) AND libSignature AND afoSignature AND hodSignature = 1";
         if ($selectedStatus == 'review') {
-          $sql .= " AND aaroSignature = 0 || registrarSignature = 0";
+          $sql .= " AND (aaroSignature = 0 OR registrarSignature = 0)";
         }elseif($selectedStatus == 'completed'){
-          $sql .= " AND aaroSignature = 1 || registrarSignature = 1";
+          $sql .= " AND (aaroSignature = 1 OR registrarSignature = 1)";
         }
       }
 
@@ -200,7 +218,7 @@ table,td{
             $saoSignature = $row['saoSignature'];
             $counselingSignature = $row['counselingSignature'];
             $sroSignature = $row['sroSignature'];
-            $librarySignature = $row['librarySignature'];
+            $libSignature = $row['libSignature'];
             $afoSignature = $row['afoSignature'];
             $hodSignature = $row['hodSignature'];
             $aaroSignature = $row['aaroSignature'];
@@ -229,8 +247,8 @@ table,td{
                 }else{
                   $status = 'Completed';
                 }
-              }elseif($position == 'library'){
-                if($librarySignature == 0){
+              }elseif($position == 'lib'){
+                if($libSignature == 0){
                   $status = 'Review';
                 }else{
                   $status = 'Completed';
@@ -267,11 +285,18 @@ table,td{
           <td class="table-light"><?php echo $applicantID; ?></td>
           <td class="table-light"><?php echo $applicationDate; ?></td>
           <?php if($position == 'aaro' || $position == 'sao') { ?>
-            <td class="table-light">
-            <a href="reviewDeferment.php?defermentID=<?php echo $defermentID; ?>&status=<?php echo $status; ?>"><?php echo $status; ?></a>
+            <td class="table-light"><?php if($status == 'Review'){ ?>
+              <a href="reviewDeferment.php?defermentID=<?php echo $defermentID; ?>&status=<?php echo $status; ?>"><?php echo $status; ?></a>
+              <?php } else{ echo $status; } ?>
             </td>
-            <td class="table-light">
-            <a href="reviewDeferment.php?defermentID=<?php echo $defermentID; ?>&status=<?php echo $status2; ?>"><?php echo $status2; ?></a>
+            <td class="table-light"><?php if($status == 'Review'){ echo $status2;
+              } elseif($status == 'Completed' && $status == 'Review'){
+                ?> 
+                <a href="reviewDeferment.php?defermentID=<?php echo $defermentID; ?>&status=<?php echo $status2; ?>"><?php echo $status2; ?></a>
+             <?php } 
+              else{ ?> 
+                 <a href="reviewDeferment.php?defermentID=<?php echo $defermentID; ?>&status=<?php echo $status2; ?>"><?php echo $status2; ?></a>
+              <?php } ?> 
             </td>
           <?php }
           else { ?>
@@ -283,7 +308,7 @@ table,td{
         <?php 
           }
         }else{
-          ?><tr><td class="table-light" <?php if($position == 'aaro' || $position == 'sao'){ ?>colspan="6" <?php } else { ?> colspan="5" <?php } ?>><center>No application is done in this semester!</center></td></tr><?php
+          ?><tr><td class="table-light" <?php if($position == 'aaro' || $position == 'sao'){ ?>colspan="6" <?php } else { ?> colspan="5" <?php } ?>><center>No application is found!</center></td></tr><?php
         }
         ?> 
     </table>

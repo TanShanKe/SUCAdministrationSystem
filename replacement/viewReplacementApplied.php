@@ -130,7 +130,7 @@ table,td{
       if (isset($_POST['search']) && !empty($_POST['keyword'])) {
         $rowNumber = 1;
         $k=$_POST['keyword'];
-        $keyword=" where changeClassID like '%".$k."%' or lecturer.name like '%".$k."%'" ;  
+        $keyword=" where (changeClassID like '%".$k."%' or lecturer.name like '%".$k."%')" ;  
         $sql = "SELECT changeClassID, applicationDate, lecturer.name AS applicantName, aaroAcknowledge, aaroSignature,deanOrHeadAcknowledge, deanOrHeadSignature FROM change_class_record LEFT JOIN lecturer ON change_class_record.applicantID=lecturer.lecturerID".$keyword;
       }
 

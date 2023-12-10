@@ -2,6 +2,10 @@
 include '../config.php';
 session_start();
 
+//https://www.a2zwebhelp.com/php-mysql-pagination (pagination link)
+
+// https://www.javatpoint.com/php-pagination 
+
 //https://www.geeksforgeeks.org/how-to-make-a-pagination-using-html-and-css/
 
 if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'student') {
@@ -24,7 +28,7 @@ $result2 = $conn->query($sql2);
 while ($row2 = $result2->fetch_assoc()) {
   $default_year = $row2['latestYear'];
   $default_sem = $row2['latestSem'];
-}
+} 
 
 include '../header.php';
 echo "<body style='background-color:#E5F5F8'>";
@@ -102,21 +106,21 @@ table,td{
         if ($selectedSem == 1) {
           $startMonth = 3; // March
           $endMonth = 5;   // May
-          $sql = "SELECT defermentID, applicationDate FROM deferment_record
+          $sql = "SELECT defermentID, applicationDate, registrarSignature FROM deferment_record
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
           applicantID = '$userid'ORDER BY applicationDate DESC";
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
-          $sql = "SELECT defermentID, applicationDate FROM deferment_record
+          $sql = "SELECT defermentID, applicationDate, registrarSignature FROM deferment_record
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
           applicantID = '$userid'ORDER BY applicationDate DESC";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT defermentID, applicationDate FROM deferment_record
+          $sql = "SELECT defermentID, applicationDate, registrarSignature FROM deferment_record
                 WHERE YEAR(applicationDate) = '$selectedYear' AND (
                   (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
                   (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)
@@ -124,12 +128,36 @@ table,td{
                 applicantID = '$userid' ORDER BY applicationDate DESC";
       }
         $result = $conn->query($sql);
-        if ($result->num_rows > 0) {
-          while ($row = $result->fetch_assoc()) {
+
+        //pagination
+        $results_per_page = 5; 
+        $number_of_result = mysqli_num_rows($result); 
+        $number_of_page = ceil ($number_of_result / $results_per_page);  
+
+        if (!isset ($_GET['page']) ) {  
+          $page = 1;  
+        } else {  
+          $page = $_GET['page'];  
+        }  
+
+        $page_first_result = ($page-1) * $results_per_page; 
+
+        $sql2 = $sql." LIMIT ".$page_first_result . ',' . $results_per_page; 
+        $rowNumber = $page_first_result + 1;
+      
+        $result2 = $conn->query($sql2);
+
+        if ($result2->num_rows > 0) {
+          while ($row = $result2->fetch_assoc()) {
             $defermentID=$row['defermentID']; 
             $applicationDate=$row['applicationDate'];
+            $registrarSignature=$row['registrarSignature'];
 
-                  $status = 'Pending';
+            if($registrarSignature == 0){
+              $status = 'Pending';
+            } elseif($registrarSignature == 1){
+              $status = 'Completed';
+            }
               
             ?>
         <tr>
@@ -145,6 +173,11 @@ table,td{
         }
         ?> 
     </table>
+    <?php 
+            for($page = 1; $page<= $number_of_page; $page++) {  
+              echo '<a href = "viewDeferment.php?page=' . $page . '">' . $page . ' </a>';  
+           }  ?>
+  
     <button name="back" type="button" class="btn btn-secondary" style = "margin:20px;" onclick="back()";>Back</button>
     </div>
 

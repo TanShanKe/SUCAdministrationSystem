@@ -20,7 +20,7 @@ if (isset($_POST['login'])) {
           $_SESSION['position'] = $position;
           if($position == 'student'){
             header("Location: main.php");
-          }elseif($position == 'aaro' || $position == 'afo' || $position == 'deanOrHod' || $position == 'iso' || $position == 'sao' ){
+          }elseif($position == 'aaro' || $position == 'afo' || $position == 'deanOrHod' || $position == 'iso' || $position == 'sao' || $position == 'sro' || $position == 'lib'){
             header("Location: adminMain.php");
           }elseif($position == 'lecturer'){
             header("Location: lecturerMain.php");

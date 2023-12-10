@@ -7,7 +7,7 @@ if (!isset($_SESSION['userid'])) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
 }
 
-$allowedPositions = ["deanOrHod", "aaro", "afo", "library", "sao", "iso", "sro"];
+$allowedPositions = ["deanOrHod", "aaro", "afo", "lib", "sao", "iso", "sro"];
 if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
   exit();
