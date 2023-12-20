@@ -45,6 +45,20 @@ table,td{
   border-style: solid;
   border-color: black;
 }
+
+.pagination a {
+  color: black;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+.pagination a.active {
+  background-color: dodgerblue;
+  color: white;
+}
+
+.pagination a:hover:not(.active) {background-color: #ddd;}
+
 </style>
 
   <div style="margin: 40px;">
@@ -57,8 +71,12 @@ table,td{
         <label for="year" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Year:</label>
         <select name="selected_year" id="selected_year" style="margin-right: 30px;">
         <?php foreach ($years as $year) : ?>
-        <option value="<?php echo $year; ?>" <?php if (isset($_POST['selected_year']) && $_POST['selected_year'] == $year || (!isset($_POST['selected_year']) && $year == $default_year)) echo 'selected="selected"'; ?>>
-            <?php echo $year; ?>
+          <option value="<?php echo $year; ?>" <?php if (
+          (isset($_POST['selected_year']) && $_POST['selected_year'] == $year) || 
+          (!isset($_POST['selected_year']) && $year == $default_year) || 
+          (!empty($selectedYear) && $selectedYear == $year) 
+          ) echo 'selected="selected"'; ?>>
+          <?php echo $year; ?>
         </option>
         <?php endforeach; ?>
         </select>
@@ -68,10 +86,9 @@ table,td{
           <option value="2" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '2' || (!isset($_POST['selected_sem']) && $default_sem == '2')) echo 'selected="selected"'; ?>>2</option>
           <option value="3" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '3' || (!isset($_POST['selected_sem']) && $default_sem == '3')) echo 'selected="selected"'; ?>>3</option>
         </select>
-        <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+        <button name="check" type="submit" class="btn btn-outline-secondary" style="margin-left:20px;">Check</button>
       </div>
     </form>
-  </div>
 </div>
 
 <div class="container-fluid" style="width: 90%;" >
@@ -100,22 +117,37 @@ table,td{
           $startMonth = 3; // March
           $endMonth = 5;   // May
           $sql = "SELECT leaveID, applicationDate, aaroSignature FROM leave_record WHERE YEAR(applicationDate) = '$selectedYear' AND MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid' ORDER BY applicationDate DESC";
+          applicantID = '$userid' ORDER BY leaveID DESC";
 
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
           $sql = "SELECT leaveID, applicationDate, aaroSignature FROM leave_record WHERE YEAR(applicationDate) = '$selectedYear' AND MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid' ORDER BY applicationDate DESC";
+          applicantID = '$userid' ORDER BY leaveID DESC";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT leaveID, applicationDate, aaroSignature FROM leave_record WHERE YEAR(applicationDate) = '$selectedYear' AND ((MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)) AND applicantID = '$userid' ORDER BY applicationDate DESC";
+          $sql = "SELECT leaveID, applicationDate, aaroSignature FROM leave_record WHERE YEAR(applicationDate) = '$selectedYear' AND ((MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)) AND applicantID = '$userid' ORDER BY leaveID DESC";
       }
 
         $result = $conn->query($sql);
-        if ($result->num_rows > 0) {
-          while ($row = $result->fetch_assoc()) {
+
+        //pagination
+        $results_per_page = 10; 
+        $number_of_result = mysqli_num_rows($result); 
+        $number_of_page = ceil ($number_of_result / $results_per_page);  
+
+        $page = (!isset ($_GET['page'])) ? 1 : $_GET['page'];
+
+        $page_first_result = ($page-1) * $results_per_page; 
+
+        $sql2 = $sql." LIMIT ".$page_first_result . ',' . $results_per_page; 
+        $rowNumber = $page_first_result + 1;
+      
+        $result2 = $conn->query($sql2);
+
+        if ($result2->num_rows > 0) {
+          while ($row = $result2->fetch_assoc()) {
             $leaveID=$row['leaveID']; 
             $applicationDate=$row['applicationDate'];
             $aaroSignature = $row['aaroSignature'];
@@ -142,7 +174,28 @@ table,td{
         }
         ?> 
     </table>
-    <button name="back" type="button" class="btn btn-secondary" style = "margin:20px;" onclick="back()";>Back</button>
     </div>
+    <div class="pagination">
+    <?php 
+    //pagination
+    $previouspage = $page-1;
+    if($previouspage < 1){
+      $previouspage = 1;
+    }
+    if($number_of_page>1){
+      echo '<a href="viewLeave.php?page=' . $previouspage . '&year='.$selectedYear.'&sem='.$selectedSem.'">&laquo;</a>';
+      for($i = 1; $i<= $number_of_page; $i++) {  
+        $class = ($page == $i) ? 'active' : '';
+        echo '<a href = "viewLeave.php?page=' . $i . '&year='.$selectedYear.'&sem='.$selectedSem.'" class="' . $class . '">' . $i . ' </a>';  
+      }  
+      $nextpage = $page+1;
+      if($nextpage > $number_of_page){
+        $nextpage = $page;
+      }
+      echo '<a href="viewLeave.php?page=' . $nextpage . '&year='.$selectedYear.'&sem='.$selectedSem.'">&raquo;</a>';
+    } ?>
+    </div>
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; float: right;" onclick="back()";>Back</button>
+  </div>
   </body>
 </html>

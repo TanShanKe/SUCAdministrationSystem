@@ -34,7 +34,11 @@ echo "<body style='background-color:#E5F5F8'>";
 <script>
   var baseUrl = '../';
   function back() {
-    location.href = '../adminMain.php';
+    <?php if($position == 'deanOrHod'){ ?>
+      location.href = '../hodMain.php';
+    <?php }elseif($position =='aaro'){ ?>
+      location.href = '../aaroMain.php';
+    <?php } ?>
   }
 </script>
 
@@ -73,17 +77,16 @@ table,td{
         <label for="status" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Status:</label>
         <select name="selected_status" id="selected_status" style="margin-right: 30px;">
           <option value="">All</option>
-          <option value="approval" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'approval') echo 'selected="selected"'; ?>>Approval</option>
+          <option value="review" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'review') echo 'selected="selected"'; ?>>Review</option>
           <option value="completed" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'completed') echo 'selected="selected"'; ?>>Completed</option>
         </select>
-        <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+        <button name="check" type="submit" class="btn btn-outline-secondary" style="margin-left:20px;">Check</button>
         </div>
         <div class="row justify-content-center" style="margin: 20px;">
         <input name="keyword" type="search" style="margin-right: 20px;" placeholder="Search" >
         <button name="search" class="btn btn-outline-secondary" type="submit">Search</button>
       </div>
     </form>
-  </div>
 </div>
 
 <div class="container-fluid" style="width: 90%;" >
@@ -130,18 +133,18 @@ table,td{
       if (isset($_POST['search']) && !empty($_POST['keyword'])) {
         $rowNumber = 1;
         $k=$_POST['keyword'];
-        $keyword=" where (changeClassID like '%".$k."%' or lecturer.name like '%".$k."%')" ;  
+        $keyword=" where (changeClassID like '%".$k."%' or lecturer.name like '%".$k."%' or applicationDate like '%".$k."%')" ;  
         $sql = "SELECT changeClassID, applicationDate, lecturer.name AS applicantName, aaroAcknowledge, aaroSignature,deanOrHeadAcknowledge, deanOrHeadSignature FROM change_class_record LEFT JOIN lecturer ON change_class_record.applicantID=lecturer.lecturerID".$keyword;
       }
 
       if (isset($_POST['search']) && empty($_POST['keyword'])) {
         echo '<script type="text/javascript">
-        alert("Please insert application id to search!");
+        alert("Please insert application id, applicant name or application date to search!");
         </script>';
       }
 
       if ($position == 'deanOrHod') {
-        if ($selectedStatus == 'approval') {
+        if ($selectedStatus == 'review') {
           $sql .= " AND deanOrHeadSignature = 0 ";
         }elseif($selectedStatus == 'completed'){
           $sql .= " AND deanOrHeadSignature = 1";
@@ -150,14 +153,14 @@ table,td{
 
       if ($position == 'aaro') {
         $sql .= " AND deanOrHeadSignature = 1";
-        if ($selectedStatus == 'approval') {
+        if ($selectedStatus == 'review') {
           $sql .= " AND aaroSignature = 0 ";
         }elseif($selectedStatus == 'completed'){
           $sql .= " AND aaroSignature = 1";
         }
       }
 
-      $sql .= " ORDER BY applicationDate DESC";
+      $sql .= " ORDER BY changeClassID DESC";
       
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
@@ -172,13 +175,13 @@ table,td{
 
               if($position == 'deanOrHod'){
                 if($deanOrHeadSignature == 0){
-                  $status = 'Approval';
+                  $status = 'Review';
                 }else{
                   $status = 'Completed';
                 }
               } elseif($position =='aaro'){
                 if($aaroSignature == 0){
-                  $status = 'Approval';
+                  $status = 'Review';
                 }else{
                   $status = 'Completed';
                 }
@@ -200,7 +203,8 @@ table,td{
         }
         ?> 
     </table>
-    <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
+      </div>
+      <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; float: right;" onclick="back()";>Back</button>
     </div>
   </body>
 </html>

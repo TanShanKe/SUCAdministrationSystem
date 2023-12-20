@@ -43,25 +43,19 @@ echo "<body style='background-color:#E5F5F8'>";
     <p>Logged in as student, <?php echo $name; ?></p>
   <div class="row" >
     <div class="col-sm" style="margin: 20px;">
-        <a href="subjectRegistration/applySubjectRegistration.php">
-            <img src="images/subjects.png" class="image"><br>
-            <label class="form-label font">Subject Registration Application</label>
-        </a>
-    </div>
-    <div class="col-sm" style="margin: 20px;">
-        <a href="leave/viewLeave.php">
+        <a href="leave/viewLeave.php?page=1">
             <img src="images/leave.png" class="image"><br>
             <label class="form-label font">Incident & Funerary Leave Application</label>
         </a>
     </div>
-    </div>
-    <div class="row">
     <div class="col-sm" style="margin: 20px;">
         <a href="deferment/viewDeferment.php">
             <img src="images/deferment.png" class="image"><br>
             <label class="form-label font">Deferment/ Withdrawal Application</label>
         </a>
     </div>
+    </div>
+    <div class="row">
     <div class="col-sm" style="margin: 20px;">
         <a href="resumption/viewResumption.php">
             <img src="images/resumption.png" class="image"><br>

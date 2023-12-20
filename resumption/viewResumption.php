@@ -9,6 +9,33 @@ if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'student') {
 
 $userid = $_SESSION['userid'];
 
+$registrarSignature=null;
+$registrarDecision=null;
+$resumptionRegistrarSignature=null;
+$registrarAcknowledge=null;
+$defermentID=null;
+
+$sql3 = "SELECT defermentID, registrarSignature, registrarDecision FROM deferment_record WHERE applicantID = '$userid' ORDER BY defermentID DESC LIMIT 1";
+
+$result3 = $conn->query($sql3);
+if ($result3->num_rows > 0) {
+  while ($row = $result3->fetch_assoc()) {
+    $registrarDecision=$row['registrarDecision'];
+    $registrarSignature=$row['registrarSignature'];
+    $defermentID=$row['defermentID'];
+  }
+}
+
+$sql4 = "SELECT registrarAcknowledge, registrarSignature AS resumptionRegistrarSignature FROM resumption_of_studies_record WHERE defermentID = '$defermentID' AND applicantID = '$userid' ORDER BY resumptionID DESC LIMIT 1";
+
+$result4 = $conn->query($sql4);
+if ($result4->num_rows > 0) {
+  while ($row = $result4->fetch_assoc()) {
+    $registrarAcknowledge=$row['registrarAcknowledge'];
+    $resumptionRegistrarSignature=$row['resumptionRegistrarSignature'];
+  }
+}
+
 $sql1 = "SELECT DISTINCT YEAR(applicationDate) AS year FROM resumption_of_studies_record WHERE applicantID = '$userid'";
 $result1 = $conn->query($sql1);
 $years = array();
@@ -33,6 +60,17 @@ echo "<body style='background-color:#E5F5F8'>";
   function back() {
     location.href = '../main.php';
   }
+  function applydisable(){
+    var button = document.getElementById("applyBtn");
+  <?php   
+  if ($registrarSignature == 1 && $registrarDecision == 1) { ?>
+    button.disabled = false;
+  <?php  } 
+  if(($registrarSignature == 1 && $registrarDecision == 0)||($registrarSignature == 0 && $registrarDecision == null)||($registrarAcknowledge == 1 && $resumptionRegistrarSignature == 1)||is_null($defermentID)){ ?>
+    button.disabled = true;
+  <?php }
+    ?> 
+  }
 </script>
 
 <style>
@@ -47,12 +85,12 @@ table,td{
 }
 </style>
 
-
+<body onload='applydisable()'>
   <div style="margin: 40px;">
     <form  action="" method="post" enctype="multipart/form-data">
       <div class="d-flex justify-content-center">
       <h3 style="margin-right: 20px">Resumption of Studies Application</h3>
-      <button class="btn btn-primary" type="button" onclick="location.href='applyResumption.php';">Register</button>
+      <button class="btn btn-primary" type="button" id = "applyBtn" onclick="location.href='applyResumption.php';">Apply</button> 
       </div>
       <div class="row justify-content-center" style="margin: 20px;">
         <label for="year" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Year:</label>
@@ -69,7 +107,7 @@ table,td{
           <option value="2" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '2' || (!isset($_POST['selected_sem']) && $default_sem == '2')) echo 'selected="selected"'; ?>>2</option>
           <option value="3" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '3' || (!isset($_POST['selected_sem']) && $default_sem == '3')) echo 'selected="selected"'; ?>>3</option>
         </select>
-        <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+        <button name="check" type="submit" class="btn btn-outline-secondary" style="margin-left:20px;">Check</button>
       </div>
     </form>
   </div>
@@ -100,43 +138,43 @@ table,td{
         if ($selectedSem == 1) {
           $startMonth = 3; // March
           $endMonth = 5;   // May
-          $sql = "SELECT resumptionID, applicationDate, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature FROM resumption_of_studies_record
+          $sql = "SELECT resumptionID, applicationDate, aaroSignature, afoSignature, deanOrHeadSignature, registrarAcknowledge, registrarSignature FROM resumption_of_studies_record
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid'ORDER BY applicationDate DESC";
+          applicantID = '$userid'ORDER BY resumptionID DESC";
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
-          $sql = "SELECT resumptionID, applicationDate, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature  FROM resumption_of_studies_record
+          $sql = "SELECT resumptionID, applicationDate, aaroSignature, afoSignature, deanOrHeadSignature, registrarAcknowledge, registrarSignature FROM resumption_of_studies_record
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid'ORDER BY applicationDate DESC";
+          applicantID = '$userid'ORDER BY resumptionID DESC";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT resumptionID, applicationDate, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature  FROM resumption_of_studies_record
+          $sql = "SELECT resumptionID, applicationDate, aaroSignature, afoSignature, deanOrHeadSignature, registrarAcknowledge, registrarSignature FROM resumption_of_studies_record
                 WHERE YEAR(applicationDate) = '$selectedYear' AND (
                   (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
                   (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)
                 )AND
-                applicantID = '$userid' ORDER BY applicationDate DESC";
+                applicantID = '$userid' ORDER BY resumptionID DESC";
       }
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
             $resumptionID=$row['resumptionID']; 
             $applicationDate=$row['applicationDate'];
-            $aaroAcknowledge = $row['aaroAcknowledge'];
             $aaroSignature = $row['aaroSignature'];
-            $afoAcknowledge = $row['afoAcknowledge'];
             $afoSignature = $row['afoSignature'];
-            $deanOrHeadAcknowledge = $row['deanOrHeadAcknowledge'];
             $deanOrHeadSignature = $row['deanOrHeadSignature'];
+            $registrarAcknowledge = $row['registrarAcknowledge'];
+            $registrarSignature = $row['registrarSignature'];
+
                       
-              if ($aaroSignature == 0 || $afoSignature == 0 || $deanOrHeadSignature == 0) {
+              if ($aaroSignature == 0 || $afoSignature == 0 || $deanOrHeadSignature == 0 || $registrarSignature == 0) {
                   $status = 'Pending';
               }
-               elseif ($aaroAcknowledge == 1 && $afoAcknowledge == 1 && $deanOrHeadAcknowledge == 1) {
+               elseif ($registrarAcknowledge == 1) {
                   $status = 'Approved';
               } else {
                   $status = 'Disapproved';
@@ -146,19 +184,16 @@ table,td{
           <td class="table-light"><?php echo $rowNumber++; ?></td>
           <td class="table-light"><?php echo $resumptionID; ?></td>
           <td class="table-light"><?php echo $applicationDate; ?></td>
-          <td class="table-light"><?php if ($status === 'Approved' || $status === 'Disapproved'): ?>
-          <a href="viewResumptionResult.php?resumptionID=<?php echo $resumptionID; ?>"><?php echo $status; ?></a>
-          <?php else: ?><?php echo $status; ?><?php endif; ?></td>
+          <td class="table-light"><a href="viewResumptionResult.php?resumptionID=<?php echo $resumptionID; ?>"><?php echo $status; ?></a></td>
          </tr>   
         <?php 
           }
         }else{
-          ?><tr><td class="table-light" colspan="4"><center>No application is done in this semester!</center></td></tr><?php
+          ?><tr><td class="table-light" colspan="4"><center>No application is done in this semester! </center></td></tr><?php
         }
         ?> 
     </table>
-    <button name="back" type="button" class="btn btn-secondary" style = "margin:20px;" onclick="back()";>Back</button>
     </div>
-
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; margin-top:15px; float: right;" onclick="back()";>Back</button>
   </body>
 </html>

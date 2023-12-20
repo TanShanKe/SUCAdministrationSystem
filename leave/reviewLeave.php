@@ -121,9 +121,9 @@ table,td{
 
 <div class="container-fluid" style="width: 95%;" >
   <div class="d-flex justify-content-center" style=" margin-top:40px ">
-  <h3 style="margin-right: 20px">Student Incident & Funerary Leave Application</h3>
+  <h3 style="margin-right: 20px">Incident & Funerary Leave Application</h3>
   </div>
-    <div class="row" style="margin:40px; margin-top:15px">
+    <div class="row" style="margin:20px; margin-top:15px">
     <label for="" class="form-label" >Application Details</label>
     <table class="table">  
         <tr>
@@ -226,8 +226,8 @@ table,td{
         <p>I voluntarily acknowledge and accept full responsibility for the decision I am about to make, understanding that my choice will have significant consequences.</p>
         </div>
         <input type="hidden" name="leaveID" value="<?php echo $leaveID; ?>">
-        <button name="submit" type="submit" class="btn btn-primary" style="margin-left:20px;">Submit</button>
-        <button name="cancel" type="button" class="btn btn-secondary" style="margin-left:20px;" onclick="confirmCancel()";>Cancel</button>
+        <button name="submit" type="submit" class="btn btn-primary" style="margin-left:20px; float:right;">Submit</button>
+        <button name="cancel" type="button" class="btn btn-outline-secondary" style="margin-left:20px; float:right;" onclick="confirmCancel()";>Cancel</button>
       </form>
       <?php
       
@@ -283,7 +283,7 @@ table,td{
 
         <?php 
         if ($aaroSignature == 1) { ?>
-        <label for="" class="form-label" >Academic Affairs & Registration Office</label>
+        <label for="" class="form-label" >Academic Affairs, Admission & Registration Office </label>
         <table class="table "> 
         <tr>
           <th class="thReview">AARO Name</th>
@@ -297,10 +297,10 @@ table,td{
             }
           ?>
         </table>
-        <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
+    </div>
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; margin-right:20px; float:right;" onclick="back()";>Back</button>
         <?php   
     }?>
-    </div>
   </div>
   </body>
 </html>

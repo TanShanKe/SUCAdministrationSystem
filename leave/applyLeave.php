@@ -40,6 +40,9 @@ if(isset($_POST['apply'])){
   $applicationDate=date("Y-m-d"); 
   $uniqid = uniqid();
 
+  $sql = "INSERT INTO leave_record (leaveID, typeOfLeave, dateOfLeave, noOfDays, reason, applicantID, applicantSignature, applicationDate) VALUES ('$generatedId', '$type', '$dateOfLeave', '$noOfDays', '$reason', '$userid', '1', '$applicationDate')";
+  $result = $conn->query($sql);
+
   $target_dir = "uploads/";
   //$target_file = $target_dir . basename($_FILES["documentalProof"]["name"]); 
   //$uploadOk = 1;
@@ -72,9 +75,6 @@ if(isset($_POST['apply'])){
         echo "Error uploading the file.";
       }
       }
-          
-      $sql = "INSERT INTO leave_record (leaveID, typeOfLeave, dateOfLeave, noOfDays, reason, applicantID, applicantSignature, applicationDate) VALUES ('$generatedId', '$type', '$dateOfLeave', '$noOfDays', '$reason', '$userid', '1', '$applicationDate')";
-      $result = $conn->query($sql);
 
       foreach ($subjectCode as $selectedSubjectCode) {
         $lecturerID = $_POST['lecturerID'][$selectedSubjectCode];
@@ -112,13 +112,32 @@ echo "<body style='background-color:#E5F5F8'>";
       location.href = 'viewLeave.php';
     }
   }
+
+  function validateForm() {
+    var checkboxes = document.getElementsByName('subjectCode[]');
+    var isChecked = false;
+
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            isChecked = true;
+            break;
+        }
+    }
+
+    if (!isChecked) {
+        alert("Please select at least one subject!");
+        return false;
+    }
+
+    return true;
+  }
 </script>
 
 <style>
 .subject {
-  padding: 10px;
-    border-style: solid;
-    border-color: grey;
+  padding-right: 2px;
+  padding-bottom: 0px;
+  vertical-align: top;
 }
 </style>
 
@@ -126,7 +145,7 @@ echo "<body style='background-color:#E5F5F8'>";
   <body>
   <div style="margin: 40px;">
   <h3 style="margin-top: 10px; margin-bottom: 30px;"><center>Student Incident & Funerary Leave Application Form</center></h3>
-    <form  action="" method="post" enctype="multipart/form-data">
+    <form  action="" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
       <div class="row" style="margin: 20px;">
         <label for="type" class="form-label" style="margin-top: 3px;">Type Of Leave: </label>
           <div class="form-check form-check-inline" style="margin-left: 30px;">
@@ -150,15 +169,15 @@ echo "<body style='background-color:#E5F5F8'>";
     <label for="reason" id="reason"class="form-label" style="margin-top: 5px; margin-right: 30px;">Reason(s):</label>
       <textarea class="form-control" placeholder="Leave your reason here" name="reason" id="reason" required></textarea>
     </div>
-    <div class="row" style="margin: 20px;">
+    <div class="row" style="margin: 20px; margin-bottom: 0px;">
         <label for="documentalProof" id="documentalProof"class="form-label" style="margin-top: 5px; margin-right: 30px;">Documental Proof: </label>
         <input type="file" name="documentalProof[]" id="documentalProof" required multiple>
     </div>
-    <div class="row" style="margin: 20px;">
+    <div class="row" style="margin: 20px; margin-top: 0px;">
         <p style="color:grey;">**Hold down the Ctrl (windows) or Command (Mac) button to select multiple files**</p>
     </div>
     <div class="row" style="margin: 20px;">
-    <label for="subject" id="subject"class="form-label" style="margin-top: 5px; margin-right: 30px;">Subject: </label>
+    <label for="subject" id="subject"class="form-label" style="margin-right: 30px;">Subject: </label>
         <table style="border-spacing: 10px;">
     <?php
     $sql = "select subject.name as subjectName, lecturer.name as lecturerName, subject_student.subjectCode, subject_student.lecturerID from subject_student left join subject on subject_student.subjectCode=subject.subjectCode left join lecturer on subject_student.lecturerID=lecturer.lecturerID where studentID = '$userid'";
@@ -168,24 +187,20 @@ echo "<body style='background-color:#E5F5F8'>";
       while ($row = $result->fetch_assoc()) {
         $subjectCode=$row['subjectCode'];
         $lecturerID=$row['lecturerID']
-
-       
         ?>
-        
         <tr>
             <td class="subject">
             <input type="checkbox" name="subjectCode[]" value="<?php echo $subjectCode ?>">
             <input type="hidden" name="lecturerID[<?php echo $subjectCode ?>]" value="<?php echo $lecturerID ?>">
             </td>
-            <td class="subject"><label for="subjectCode"><?php echo $row["subjectName"]; ?></label></td>
-            <td class="subject"><label for="lecturerName"><?php echo $row["lecturerName"]; ?></label></td>
+            <td class="subject"><label for="subjectCode"><?php echo $row["subjectName"].' ('.$row["lecturerName"].')'; ?></label></td>
         </tr>
         <?php
       }
     }
     ?>
     </table>
-</div><br>
+</div>
       <div class="row" style="margin: 20px;">
       <table> 
         <tr>
@@ -195,8 +210,8 @@ echo "<body style='background-color:#E5F5F8'>";
       </table>
       <p>I understand and agree that Southern University College has the permission to use my personal data for the purpose of administering. I have read, understand and agreed to the Personal Data Protection Act of Southern University College. <br> (Note: You may access and update your personal data by writing to us at <a href="mailto:reg@sc.edu.my">reg@sc.edu.my</a>)</p>
       </div>
-      <button name="apply" type="submit" class="btn btn-info" style="margin-left:20px;">Apply</button>
-      <button name="apply" type="button" class="btn btn-secondary" style="margin-left:20px;" onclick="confirmCancel()";>Cancel</button>
+      <button name="apply" type="submit" class="btn btn-info" style="margin:20px; margin-top:0px; float:right;">Apply</button>
+      <button name="apply" type="button" class="btn btn-outline-secondary" style="margin-bottom:20px; float:right;" onclick="confirmCancel()";>Cancel</button>
     </form>
   </div>
   </body>

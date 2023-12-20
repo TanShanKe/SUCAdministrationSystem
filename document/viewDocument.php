@@ -68,10 +68,9 @@ table,td{
           <option value="2" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '2' || (!isset($_POST['selected_sem']) && $default_sem == '2')) echo 'selected="selected"'; ?>>2</option>
           <option value="3" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '3' || (!isset($_POST['selected_sem']) && $default_sem == '3')) echo 'selected="selected"'; ?>>3</option>
         </select>
-        <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+        <button name="check" type="submit" class="btn btn-outline-secondary" style="margin-left:20px;">Check</button>
       </div>
     </form>
-  </div>
 </div>
 
 <div class="container-fluid" style="width: 90%;" >
@@ -99,44 +98,43 @@ table,td{
         if ($selectedSem == 1) {
           $startMonth = 3; // March
           $endMonth = 5;   // May
-          $sql = "SELECT document_record.documentID, applicationDate, afoDecision, afoSignature, updateApplicantSignature, collectionStatus FROM document_record 
+          $sql = "SELECT documentID, applicationDate, applicationStatus, waitingStatus, collectionStatus FROM document_record 
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid'ORDER BY applicationDate DESC";
+          applicantID = '$userid'ORDER BY documentID DESC";
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
-          $sql = "SELECT document_record.documentID, applicationDate, afoDecision, afoSignature, updateApplicantSignature, collectionStatus FROM document_record
+          $sql = "SELECT documentID, applicationDate, applicationStatus, waitingStatus, collectionStatus FROM document_record
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid'ORDER BY applicationDate DESC";
+          applicantID = '$userid'ORDER BY documentID DESC";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT document_record.documentID, applicationDate, afoDecision, afoSignature, updateApplicantSignature, collectionStatus FROM document_record 
+          $sql = "SELECT documentID, applicationDate, applicationStatus, waitingStatus, collectionStatus FROM document_record 
           WHERE YEAR(applicationDate) = '$selectedYear' AND (
                   (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
                   (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)
                 )AND
-                applicantID = '$userid' ORDER BY applicationDate DESC";
+                applicantID = '$userid' ORDER BY documentID DESC";
       }
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
             $documentID=$row['documentID']; 
             $applicationDate=$row['applicationDate'];
-            $afoDecision = $row['afoDecision'];
-            $afoSignature = $row['afoSignature'];
-            $updateApplicantSignature = $row['updateApplicantSignature'];
+            $applicationStatus = $row['applicationStatus'];
             $collectionStatus = $row['collectionStatus'];
+            $waitingStatus = $row['waitingStatus'];
                       
-              if ($afoDecision == null) {
+              if ($applicationStatus == null) {
                   $status = 'Pending';
-              } elseif ($afoDecision == 0) {
+              } elseif ($applicationStatus == 0) {
                 $status = 'Update';
-              } if ($updateApplicantSignature == 1 && $afoSignature == 0) {
+              } if ($applicationStatus == 0 && $waitingStatus == 1) {
                 $status = 'Updating';
-              } else if ($afoSignature == 1){
+              } else if ($applicationStatus == 1){
                 $status = 'Completed';
               } 
               if (!is_null($collectionStatus)){
@@ -160,8 +158,8 @@ table,td{
         }
         ?> 
     </table>
-    <button name="back" type="button" class="btn btn-secondary" style = "margin:20px;" onclick="back()";>Back</button>
+      </div>
+      <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; float: right;" onclick="back()";>Back</button>
     </div>
-
   </body>
 </html>

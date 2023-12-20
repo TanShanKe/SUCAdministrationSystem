@@ -40,6 +40,9 @@ if(isset($_POST['apply'])){
   $target_dir = "uploads/paymentSlip/";
   $totalfiles = count($_FILES['paymentSlip']['name']);
 
+  $sql = "INSERT INTO document_record (documentID, document, reason, applicantID, applicantSignature, applicationDate, counter) VALUES ('$generatedId', '$chk', '$reason', '$userid', '1', '$applicationDate', '1')";
+  $result=$conn->query($sql);
+
   for($i=0;$i<$totalfiles;$i++){    
   $file_name = uniqid() . "_" . basename($_FILES["paymentSlip"]["name"][$i]);
   $target_file = $target_dir . $file_name;
@@ -48,7 +51,6 @@ if(isset($_POST['apply'])){
       if (move_uploaded_file($_FILES["paymentSlip"]["tmp_name"][$i], $target_file)) {
           echo "The file " . htmlspecialchars($file_name) . " has been uploaded.";
           // Update your SQL query to include the file path
-
           $sql = "INSERT INTO document_paymentslip (documentID, fileName) VALUES ('$generatedId', '$target_file')";
           $result=$conn->query($sql);
       
@@ -57,9 +59,6 @@ if(isset($_POST['apply'])){
         }
 
   }
-
-        $sql = "INSERT INTO document_record (documentID, document, reason, applicantID, applicantSignature, applicationDate) VALUES ('$generatedId', '$chk', '$reason', '$userid', '1', '$applicationDate')";
-        $result=$conn->query($sql);
 
         if ($result === TRUE) {
           echo '<script type="text/javascript">';
@@ -100,8 +99,8 @@ echo "<body style='background-color:#E5F5F8'>";
   }
 </script>
 
-<div class="row">
-  <div class="col" style="margin: 40px;">
+
+  <div style="margin: 40px;">
     <form  action="" method="post" enctype="multipart/form-data">
       <h3 style="margin-top: 10px; margin-bottom: 30px;"><center>Document Application Form</center></h3>
       <div class="row" style="margin: 10px; margin-left: 20px;"> 
@@ -200,7 +199,7 @@ echo "<body style='background-color:#E5F5F8'>";
       </div>
       <div class="row" style="margin: 20px; margin-top:30px; margin-bottom:0px;">
         <label for="paymentSlip" id="paymentSlip"class="form-label" style="margin-top: 5px; margin-right: 30px;">Payment Slip: </label>
-        <input type="file" name="paymentSlip[]" id="paymentSlip" multiple>
+        <input type="file" name="paymentSlip[]" id="paymentSlip" multiple required>
       </div>
       <div class="row" style="margin-left: 20px; margin-top:0px">
         <p style="color:grey;">**Hold down the Ctrl (windows) or Command (Mac) button to select multiple files**</p>
@@ -215,11 +214,10 @@ echo "<body style='background-color:#E5F5F8'>";
       </table>
       <p>I understand and agree that Southern University College has the permission to use my personal data for the purpose of administering. I have read, understand and agreed to the Personal Data Protection Act of Southern University College. <br> (Note: You may access and update your personal data by writing to us at <a href="mailto:reg@sc.edu.my">reg@sc.edu.my</a>)</p>
       </div>
-      <button name="apply" type="submit" class="btn btn-info" style="margin-left:20px;">Apply</button>
-      <button name="apply" type="button" class="btn btn-secondary" style="margin-left:20px;" onclick="confirmCancel()";>Cancel</button>
+      <button name="apply" type="submit" class="btn btn-info" style="margin:20px; margin-top:0px; float:right;">Apply</button>
+      <button name="apply" type="button" class="btn btn-outline-secondary" style="margin-bottom:20px; float:right;" onclick="confirmCancel()";>Cancel</button>
     </form>
   </div>
-</div>
 
   </body>
 </html>

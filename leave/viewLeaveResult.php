@@ -68,7 +68,7 @@ table,td{
   <div class="d-flex justify-content-center" style=" margin-top:40px ">
   <h3 style="margin-right: 20px">Student Incident & Funerary Leave Application Result</h3>
   </div>
-  <div class="row" style="margin:40px; margin-top:15px">
+  <div class="row" style="margin:20px; margin-top:15px">
     <label for="" class="form-label" >Application Details</label>
     <table class="table">  
         <tr>
@@ -163,7 +163,7 @@ table,td{
           if($aaroSignature == 1){
             ?>
               </table> 
-              <label for="" class="form-label" >Academic Affairs & Registration Office</label>
+              <label for="" class="form-label" >Academic Affairs, Admission & Registration Office </label>
               <table class="table "> 
               <tr>
                 <th class="thReview">AARO Name</th>
@@ -178,8 +178,8 @@ table,td{
           }
         }
         ?> 
-    <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
     </div>
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; margin-right:20px; float: right;" onclick="back()";>Back</button>
   </div>
 
   </body>

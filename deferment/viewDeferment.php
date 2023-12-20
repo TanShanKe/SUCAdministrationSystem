@@ -15,6 +15,33 @@ if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'student') {
 
 $userid = $_SESSION['userid'];
 
+$registrarSignature=null;
+$registrarDecision=null;
+$resumptionRegistrarSignature=null;
+$registrarAcknowledge=null;
+$defermentID=null;
+
+$sql3 = "SELECT defermentID, registrarDecision, registrarSignature FROM deferment_record WHERE applicantID = '$userid' ORDER BY defermentID DESC LIMIT 1";
+
+$result3 = $conn->query($sql3);
+if ($result3->num_rows > 0) {
+  while ($row = $result3->fetch_assoc()) {
+    $registrarDecision=$row['registrarDecision'];
+    $registrarSignature=$row['registrarSignature'];
+    $defermentID=$row['defermentID'];
+  }
+}
+
+$sql4 = "SELECT registrarAcknowledge, registrarSignature AS resumptionRegistrarSignature FROM resumption_of_studies_record WHERE defermentID = '$defermentID' AND applicantID = '$userid'";
+
+$result4 = $conn->query($sql4);
+if ($result4->num_rows > 0) {
+  while ($row = $result4->fetch_assoc()) {
+    $registrarAcknowledge=$row['registrarAcknowledge'];
+    $resumptionRegistrarSignature=$row['resumptionRegistrarSignature'];
+  }
+}
+
 $sql1 = "SELECT DISTINCT YEAR(applicationDate) AS year FROM deferment_record WHERE applicantID = '$userid'";
 $result1 = $conn->query($sql1);
 $years = array();
@@ -39,6 +66,17 @@ echo "<body style='background-color:#E5F5F8'>";
   function back() {
     location.href = '../main.php';
   }
+  function applydisable(){
+    var button = document.getElementById("applyBtn");
+  <?php   
+  if ($registrarSignature == 1 && $registrarDecision == 1) { ?>
+    button.disabled = true;
+  <?php  } 
+  if($registrarAcknowledge == 1 && $resumptionRegistrarSignature == 1){ ?>
+    button.disabled = false;
+  <?php }
+    ?> 
+  }
 </script>
 
 <style>
@@ -51,14 +89,30 @@ table,td{
   border-style: solid;
   border-color: black;
 }
+
+.pagination a {
+  color: black;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color .3s;
+}
+
+.pagination a.active {
+  background-color: dodgerblue;
+  color: white;
+}
+
+.pagination a:hover:not(.active) {background-color: #ddd;}
+
 </style>
 
-
+<body onload='applydisable()'>
   <div style="margin: 40px;">
     <form  action="" method="post" enctype="multipart/form-data">
       <div class="d-flex justify-content-center">
       <h3 style="margin-right: 20px">Deferment/ Withdrawal Application</h3>
-      <button class="btn btn-primary" type="button" onclick="location.href='applyDeferment.php';">Apply</button>
+      <button class="btn btn-primary" type="button" id="applyBtn" onclick="location.href='applyDeferment.php';">Apply</button>
       </div>
       <div class="row justify-content-center" style="margin: 20px;">
         <label for="year" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Year:</label>
@@ -75,11 +129,10 @@ table,td{
           <option value="2" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '2' || (!isset($_POST['selected_sem']) && $default_sem == '2')) echo 'selected="selected"'; ?>>2</option>
           <option value="3" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '3' || (!isset($_POST['selected_sem']) && $default_sem == '3')) echo 'selected="selected"'; ?>>3</option>
         </select>
-        <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+        <button name="check" type="submit" class="btn btn-outline-secondary" style="margin-left:20px;">Check</button>
       </div>
     </form>
   </div>
-</div>
 
 <div class="container-fluid" style="width: 90%;" >
     <div class="row">
@@ -106,31 +159,31 @@ table,td{
         if ($selectedSem == 1) {
           $startMonth = 3; // March
           $endMonth = 5;   // May
-          $sql = "SELECT defermentID, applicationDate, registrarSignature FROM deferment_record
+          $sql = "SELECT defermentID, applicationDate, registrarSignature, registrarDecision FROM deferment_record
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid'ORDER BY applicationDate DESC";
+          applicantID = '$userid'ORDER BY defermentID DESC";
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
-          $sql = "SELECT defermentID, applicationDate, registrarSignature FROM deferment_record
+          $sql = "SELECT defermentID, applicationDate, registrarSignature, registrarDecision FROM deferment_record
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid'ORDER BY applicationDate DESC";
+          applicantID = '$userid'ORDER BY defermentID DESC";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT defermentID, applicationDate, registrarSignature FROM deferment_record
+          $sql = "SELECT defermentID, applicationDate, registrarSignature, registrarDecision FROM deferment_record
                 WHERE YEAR(applicationDate) = '$selectedYear' AND (
                   (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
                   (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)
                 )AND
-                applicantID = '$userid' ORDER BY applicationDate DESC";
+                applicantID = '$userid' ORDER BY defermentID DESC";
       }
         $result = $conn->query($sql);
 
         //pagination
-        $results_per_page = 5; 
+        $results_per_page = 10; 
         $number_of_result = mysqli_num_rows($result); 
         $number_of_page = ceil ($number_of_result / $results_per_page);  
 
@@ -152,11 +205,14 @@ table,td{
             $defermentID=$row['defermentID']; 
             $applicationDate=$row['applicationDate'];
             $registrarSignature=$row['registrarSignature'];
+            $registrarDecision=$row['registrarDecision'];
 
             if($registrarSignature == 0){
               $status = 'Pending';
-            } elseif($registrarSignature == 1){
-              $status = 'Completed';
+            } elseif($registrarSignature == 1 && $registrarDecision==0){
+              $status = 'Disapproved';
+            } elseif($registrarSignature == 1 && $registrarDecision==1){
+              $status = 'Approved';
             }
               
             ?>
@@ -173,13 +229,29 @@ table,td{
         }
         ?> 
     </table>
-    <?php 
-            for($page = 1; $page<= $number_of_page; $page++) {  
-              echo '<a href = "viewDeferment.php?page=' . $page . '">' . $page . ' </a>';  
-           }  ?>
-  
-    <button name="back" type="button" class="btn btn-secondary" style = "margin:20px;" onclick="back()";>Back</button>
-    </div>
 
+    <div class="pagination">
+    <?php 
+    //pagination
+    $previouspage = $page-1;
+    if($previouspage < 1){
+      $previouspage = 1;
+    }
+    if($number_of_page>1){
+      echo '<a href="viewDeferment.php?page=' . $previouspage . '">&laquo;</a>';
+      for($i = 1; $i<= $number_of_page; $i++) {  
+        $class = ($page == $i) ? 'active' : '';
+        echo '<a href = "viewDeferment.php?page=' . $i . '" class="' . $class . '">' . $i . ' </a>';  
+      }  
+      $nextpage = $page+1;
+      if($nextpage > $number_of_page){
+        $nextpage = $page;
+      }
+      echo '<a href="viewDeferment.php?page=' . $nextpage . '">&raquo;</a>';
+    } ?>
+    </div>
+    </div>
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; float: right;" onclick="back()";>Back</button>
+  </div>
   </body>
 </html>

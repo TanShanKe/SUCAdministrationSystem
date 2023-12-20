@@ -68,10 +68,9 @@ table,td{
           <option value="2" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '2' || (!isset($_POST['selected_sem']) && $default_sem == '2')) echo 'selected="selected"'; ?>>2</option>
           <option value="3" <?php if (isset($_POST['selected_sem']) && $_POST['selected_sem'] == '3' || (!isset($_POST['selected_sem']) && $default_sem == '3')) echo 'selected="selected"'; ?>>3</option>
         </select>
-        <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+        <button name="check" type="submit" class="btn btn-outline-secondary" style="margin-left:20px;">Check</button>
       </div>
     </form>
-  </div>
 </div>
 
 <div class="container-fluid" style="width: 90%;" >
@@ -101,18 +100,18 @@ table,td{
           $endMonth = 5;   // May
           $sql = "SELECT changeClassID, applicationDate, lecturer.name AS applicantName, aaroAcknowledge, aaroSignature,deanOrHeadAcknowledge, deanOrHeadSignature FROM change_class_record LEFT JOIN lecturer ON change_class_record.applicantID=lecturer.lecturerID WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid' ORDER BY applicationDate DESC";
+          applicantID = '$userid' ORDER BY changeClassID DESC";
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
           $sql = "SELECT changeClassID, applicationDate, lecturer.name AS applicantName, aaroAcknowledge, aaroSignature, deanOrHeadAcknowledge, deanOrHeadSignature FROM change_class_record LEFT JOIN lecturer ON change_class_record.applicantID=lecturer.lecturerID WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth AND
-          applicantID = '$userid' ORDER BY applicationDate DESC";
+          applicantID = '$userid' ORDER BY changeClassID DESC";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
           $sql = "SELECT changeClassID, applicationDate, lecturer.name AS applicantName, aaroAcknowledge, aaroSignature, deanOrHeadAcknowledge, deanOrHeadSignature FROM change_class_record LEFT JOIN lecturer ON change_class_record.applicantID=lecturer.lecturerID WHERE YEAR(applicationDate) = '$selectedYear' AND ((MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)) AND
-          applicantID = '$userid' ORDER BY applicationDate DESC";
+          applicantID = '$userid' ORDER BY changeClassID DESC";
       }
 
         $result = $conn->query($sql);
@@ -147,7 +146,8 @@ table,td{
         }
         ?> 
     </table>
-    <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
     </div>
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; float: right;" onclick="back()";>Back</button>
+   </div>
   </body>
 </html>

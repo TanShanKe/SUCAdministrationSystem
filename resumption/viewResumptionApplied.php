@@ -2,7 +2,7 @@
 include '../config.php';
 session_start();
 
-$allowedPositions = ["deanOrHod", "aaro", "afo"];
+$allowedPositions = ["deanOrHod", "aaro", "afo", "registrar"];
 if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
   
@@ -34,7 +34,15 @@ echo "<body style='background-color:#E5F5F8'>";
 <script>
   var baseUrl = '../';
   function back() {
-    location.href = '../adminMain.php';
+    <?php if($position == 'aaro'){ ?>
+      location.href = '../aaroMain.php';
+    <?php }elseif($position =='afo'){ ?>
+      location.href = '../afoMain.php';
+    <?php } elseif($position =='deanOrHod'){ ?>
+      location.href = '../hodMain.php';
+    <?php } elseif($position =='registrar'){ ?>
+      location.href = '../registrarMain.php';
+    <?php } ?>
   }
 </script>
 
@@ -50,8 +58,7 @@ table,td{
 }
 </style>
 
-<div class="row">
-  <div class="col" style="margin: 40px;">
+  <div style="margin: 40px;">
     <form  action="" method="post" enctype="multipart/form-data">
       <div class="d-flex justify-content-center">
       <h3 style="margin-right: 20px">Resumption of Studies Application</h3>
@@ -74,27 +81,20 @@ table,td{
         <label for="status" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Status:</label>
         <select name="selected_status" id="selected_status" style="margin-right: 30px;">
           <option value="">All</option>
-          <option value="approval" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'approval') echo 'selected="selected"'; ?>>Approval</option>
-          <option value="completed" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'completed') echo 'selected="selected"'; ?>>Completed</option>
-          <?php
-            if ($position == 'aaro') {
-              // Add the 'AllDone' option for AARO
-              echo '<option value="alldone"';
-              if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'alldone') {
-                echo ' selected="selected"';
-              }
-              echo '>AllDone</option>';
-            }
-          ?>
+          <option value="review" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'review') echo 'selected="selected"'; ?>>Review</option>
+          <?php if($position!='registrar'){ ?>
+            <option value="completed" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'completed') echo 'selected="selected"'; ?>>Completed</option>
+          <?php } ?>
+          <option value="approved" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'approved') echo 'selected="selected"'; ?>>Approved</option>
+          <option value="disapproved" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'disapproved') echo 'selected="selected"'; ?>>Disapproved</option>
         </select>
-        <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+        <button name="check" type="submit" class="btn btn-outline-secondary" style="margin-left:20px;">Check</button>
       </div>
       <div class="row justify-content-center" style="margin: 20px;">
         <input name="keyword" type="search" style="margin-right: 20px;" placeholder="Search" >
         <button name="search" class="btn btn-outline-secondary" type="submit">Search</button>
       </div>
     </form>
-  </div>
 </div>
 
 <div class="container-fluid" style="width: 90%;" >
@@ -124,19 +124,19 @@ table,td{
         if ($selectedSem == 1) {
           $startMonth = 3; // March
           $endMonth = 5;   // May
-          $sql = "SELECT resumptionID, applicationDate, applicantID, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature FROM resumption_of_studies_record
+          $sql = "SELECT resumptionID, applicationDate, applicantID, deanOrHeadSignature, afoSignature, aaroSignature, registrarSignature, registrarDecision FROM resumption_of_studies_record
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth";
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
-          $sql = "SELECT resumptionID, applicationDate, applicantID, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature  FROM resumption_of_studies_record
+          $sql = "SELECT resumptionID, applicationDate, applicantID, deanOrHeadSignature, afoSignature, aaroSignature, registrarSignature, registrarAcknowledge FROM resumption_of_studies_record
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT resumptionID, applicationDate, applicantID, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature FROM resumption_of_studies_record
+          $sql = "SELECT resumptionID, applicationDate, applicantID, deanOrHeadSignature, afoSignature, aaroSignature, registrarSignature, registrarAcknowledge FROM resumption_of_studies_record
                 WHERE YEAR(applicationDate) = '$selectedYear' AND (
                   (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
                   (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth))";
@@ -146,43 +146,56 @@ table,td{
       if (isset($_POST['search']) && !empty($_POST['keyword'])) {
         $rowNumber = 1;
         $k=$_POST['keyword'];
-        $keyword=" WHERE (resumptionID like '%".$k."%' OR applicantID like '%".$k."%')";  
-        $sql = "SELECT resumptionID, applicationDate, applicantID, aaroAcknowledge, aaroSignature, afoAcknowledge, afoSignature, deanOrHeadAcknowledge, deanOrHeadSignature FROM resumption_of_studies_record".$keyword;
+        $keyword=" WHERE (resumptionID like '%".$k."%' OR applicantID like '%".$k."%' OR applicationDate like '%".$k."%')";  
+        $sql = "SELECT resumptionID, applicationDate, applicantID, deanOrHeadSignature, afoSignature, aaroSignature, registrarSignature, registrarAcknowledge FROM resumption_of_studies_record".$keyword;
       }
 
       if (isset($_POST['search']) && empty($_POST['keyword'])) {
         echo '<script type="text/javascript">
-        alert("Please insert application id or applicant id to search!");
+        alert("Please insert application id, applicant id or application date to search!");
         </script>';
       }
 
       if ($position == 'deanOrHod') {
-        if ($selectedStatus == 'approval') {
+        if ($selectedStatus == 'review') {
           $sql .= " AND deanOrHeadSignature = 0 ";
         }elseif($selectedStatus == 'completed'){
-          $sql .= " AND deanOrHeadSignature = 1";
+          $sql .= " AND deanOrHeadSignature = 1 AND registrarAcknowledge = null";
         }
       }
 
-      if ($position == 'aaro') {
+      elseif ($position == 'afo') {
+        $sql .= " AND deanOrHeadSignature = 1";
+        if ($selectedStatus == 'review') {
+          $sql .= " AND afoSignature = 0 ";
+        }elseif($selectedStatus == 'completed' ){
+          $sql .= " AND afoSignature = 1 AND registrarAcknowledge = null";
+        }
+      }
+
+      elseif ($position == 'aaro') {
         $sql .= " AND afoSignature = 1 AND deanOrHeadSignature = 1";
-        if ($selectedStatus == 'approval') {
+        if ($selectedStatus == 'review') {
           $sql .= " AND aaroSignature = 0 ";
         }elseif($selectedStatus == 'completed'){
-          $sql .= " AND aaroSignature = 1";
+          $sql .= " AND aaroSignature = 1 AND registrarAcknowledge = null";
         }
       }
 
-      if ($position == 'afo') {
-        $sql .= " AND deanOrHeadSignature = 1";
-        if ($selectedStatus == 'approval') {
-          $sql .= " AND afoSignature = 0 ";
-        }elseif($selectedStatus == 'completed'){
-          $sql .= " AND afoSignature = 1";
+      elseif ($position == 'registrar') {
+        $sql .= " AND afoSignature = 1 AND deanOrHeadSignature = 1 AND aaroSignature = 1";
+        if ($selectedStatus == 'review') {
+          $sql .= " AND registrarSignature = 0 ";
         }
       }
 
-      $sql .= " ORDER BY applicationDate DESC";
+      if($selectedStatus == 'approved'){
+        $sql .= " AND registrarAcknowledge = 1";
+      }elseif($selectedStatus == 'disapproved'){
+        $sql .= " AND registrarAcknowledge = 0";
+      }
+
+      $sql .= " ORDER BY resumptionID DESC";
       
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
@@ -190,36 +203,42 @@ table,td{
             $resumptionID=$row['resumptionID']; 
             $applicationDate=$row['applicationDate'];
             $applicantID=$row['applicantID'];
-            $aaroAcknowledge = $row['aaroAcknowledge'];
             $aaroSignature = $row['aaroSignature'];
-            $afoAcknowledge = $row['afoAcknowledge'];
             $afoSignature = $row['afoSignature'];
-            $deanOrHeadAcknowledge = $row['deanOrHeadAcknowledge'];
             $deanOrHeadSignature = $row['deanOrHeadSignature'];
+            $registrarSignature = $row['registrarSignature'];
+            $registrarAcknowledge = $row['registrarAcknowledge'];
 
               if($position == 'deanOrHod'){
                 if($deanOrHeadSignature == 0){
-                  $status = 'Approval';
+                  $status = 'Review';
+                }else{
+                  $status = 'Completed';
+                }
+              } elseif($position =='afo'){
+                if($afoSignature == 0){
+                  $status = 'Review';
                 }else{
                   $status = 'Completed';
                 }
               } elseif($position =='aaro'){
                 if($aaroSignature == 0){
-                  $status = 'Approval';
+                  $status = 'Review';
                 }else{
                   $status = 'Completed';
                 }
-                if($deanOrHeadSignature == 1 && $aaroSignature == 1 && $afoSignature == 1){
-                  $status = 'AllDone';
-                }
-              } elseif($position =='afo'){
-                if($afoSignature == 0){
-                  $status = 'Approval';
+              } elseif($position =='registrar'){
+                if($registrarSignature == 0){
+                  $status = 'Review';
                 }else{
                   $status = 'Completed';
                 }
-              } 
-                    
+              }  
+              if($registrarSignature == 1 && $registrarAcknowledge == 1){
+                $status = 'Approved';
+              } elseif($registrarSignature == 1 && $registrarAcknowledge == 0){
+                $status = 'Disapproved';
+              }  
             ?>
         <tr>
           <td class="table-light"><?php echo $rowNumber++; ?></td>
@@ -237,10 +256,9 @@ table,td{
         }
         ?> 
     </table>
-    <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
     </div>
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; margin-left:20px; float: right;" onclick="back()";>Back</button>
   </div>
-
   </body>
 </html>
 

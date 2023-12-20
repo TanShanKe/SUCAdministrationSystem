@@ -40,11 +40,10 @@ if(isset($_POST['apply'])){
     }
   $subjectCode=$_POST['subjectCode']; 
   $lecturerID=$_POST['lecturerID']; 
-  $existingStartTime=$_POST['existingStartTime'];
-  $existingEndTime=$_POST['existingEndTime'];
+  $existingTime=$_POST['existingTime'];
+  $hour=$_POST['hour'];
   $existingVenue=$_POST['existingVenue'];
-  $newStartTime=$_POST['newStartTime'];
-  $newEndTime=$_POST['newEndTime'];
+  $newTime=$_POST['newTime'];
   $newVenue=$_POST['newVenue'];
   $reason=$_POST['reason'];
   $applicationDate=date("Y-m-d"); 
@@ -52,8 +51,13 @@ if(isset($_POST['apply'])){
   $target_dir = "uploads/";
   $totalfiles = count($_FILES['documentalProof']['name']);
 
-  $sql = "INSERT INTO change_class_record (changeClassID, subjectCode, lecturerID, typeOfChange, existingDate, existingDay, existingStartTime, existingEndTime, existingVenue, newDate, newDay, newStartTime, newEndTime, newVenue, reason, applicationDate, applicantID, applicantSignature) VALUES ('$generatedId', '$subjectCode', '$lecturerID', '$type', '$existingDate', '$existingDay', '$existingStartTime', '$existingEndTime', '$existingVenue', '$newDate' , '$newDay' , '$newStartTime' , '$newEndTime' , '$newVenue' ,  '$reason', '$applicationDate', '$userid', '1')";
-    $result=$conn->query($sql);
+  if($type = 1){
+    $sql = "INSERT INTO change_class_record (changeClassID, subjectCode, lecturerID, typeOfChange, existingDate, existingTime, hour, existingVenue, newDate, newTime, newVenue, reason, applicationDate, applicantID, applicantSignature) VALUES ('$generatedId', '$subjectCode', '$lecturerID', '$type', '$existingDate', '$existingTime', '$hour', '$existingVenue', '$newDate', '$newTime' , '$newVenue' ,  '$reason', '$applicationDate', '$userid', '1')";
+  }elseif($type = 0){
+    $sql = "INSERT INTO change_class_record (changeClassID, subjectCode, lecturerID, typeOfChange, existingDay, existingTime, hour, existingVenue, newDay, newTime, newVenue, reason, applicationDate, applicantID, applicantSignature) VALUES ('$generatedId', '$subjectCode', '$lecturerID', '$type', '$existingDay', '$existingTime', '$hour', '$existingVenue', '$newDay' , '$newTime' , '$newVenue' ,  '$reason', '$applicationDate', '$userid', '1')";
+  }
+
+  $result=$conn->query($sql);
 
   for($i=0;$i<$totalfiles;$i++){
       $file_name = uniqid() . "_" . basename($_FILES["documentalProof"]["name"][$i]);
@@ -120,8 +124,8 @@ $jsonSubjects = json_encode($subjects);
       var userID = <?php echo json_encode($userid); ?>;
 
       select.onchange = updateSubjects;
-      select.options[0] = new Option('Select the lecturer');
-      subjectsSelect.options[0] = new Option('Select the subject');
+      select.options[0] = new Option('Select the lecturer','');
+      subjectsSelect.options[0] = new Option('Select the subject','');
 
       for (var i = 0; i < lecturers.length; i++) {
           var lecturer = lecturers[i];
@@ -141,7 +145,7 @@ $jsonSubjects = json_encode($subjects);
     var lecturerID = this.value;
     var subjectsSelect = document.getElementById("subjectsSelect");
     subjectsSelect.options.length = 0; // Delete all options if any are present
-    subjectsSelect.options[0] = new Option('Select the subject'); 
+    subjectsSelect.options[0] = new Option('Select the subject',''); 
     if (lecturerID != 'Select the lecturer'){
       for(var i = 0; i < subjects[lecturerID].length; i++){
         subjectsSelect.options[i] = new Option(subjects[lecturerID][i].val, subjects[lecturerID][i].subjectCode);
@@ -165,6 +169,7 @@ $jsonSubjects = json_encode($subjects);
       newDay.disabled = false;
     }
   }
+
   </script>
   <script>
   var baseUrl = '../';
@@ -204,11 +209,11 @@ $jsonSubjects = json_encode($subjects);
       </tr>
       <tr>
         <th>Lecturer Name:</th>
-        <td><select name='lecturerID' id='lecturersSelect'></td>
+        <td><select name='lecturerID' id='lecturersSelect' required></td>
       </tr>
       <tr>
         <th>Subject Code & Name:</th>
-        <td><select name='subjectCode' id='subjectsSelect'></td>
+        <td><select name='subjectCode' id='subjectsSelect' required></td>
       </tr>
       </table>
 
@@ -220,13 +225,14 @@ $jsonSubjects = json_encode($subjects);
         </tr>
         <tr>
           <th>Date:</th>
-          <td><input type="date" id="existingDate" name="existingDate"></td>
-          <td><input type="date" id="newDate" name="newDate"></td>
+          <td><input type="date" id="existingDate" name="existingDate" required></td>
+          <td><input type="date" id="newDate" name="newDate" required></td>
         </tr>
         <tr>
         <th>Day:</th>
           <td>
-            <select name="existingDay" id="existingDay" disabled>
+            <select name="existingDay" id="existingDay" disabled required>
+              <option value="">Select day</option>
               <option value="Monday">Monday</option>
               <option value="Tuesday">Tuesday</option>
               <option value="Wednesday">Wednesday</option>
@@ -237,7 +243,8 @@ $jsonSubjects = json_encode($subjects);
             </select>
           </td>
           <td>
-            <select name="newDay" id="newDay" disabled>
+            <select name="newDay" id="newDay" disabled required>
+              <option value="">Select day</option>
               <option value="Monday">Monday</option>
               <option value="Tuesday">Tuesday</option>
               <option value="Wednesday">Wednesday</option>
@@ -249,33 +256,32 @@ $jsonSubjects = json_encode($subjects);
           </td>
         </tr>
         <tr>
-          <th>Start Time:</th>
-          <td><input type="time" id="existingStartTime" name="existingStartTime"></td>
-          <td><input type="time" id="newStartTime" name="newStartTime"></td>
+          <th>Time:</th>
+          <td><input type="time" id="existingTime" name="existingTime" value="09:00" step="1800" required></td>
+          <td><input type="time" id="newTime" name="newTime" value="09:00" step="1800" required></td>
         </tr>
         <tr>
-          <th>End Time:</th>
-          <td><input type="time" id="existingEndTime" name="existingEndTime"></td>
-          <td><input type="time" id="newEndTime" name="newEndTime"></td>
+          <th>Hour:</th>
+          <td colspan="2"><input type="number" id="hour" name="hour" min="1" value="2" required></td>
         </tr>
         <tr>
           <th>Venue:</th>
-          <td><input type="text" id="existingVenue" name="existingVenue"></td>
-          <td><input type="text" id="newVenue" name="newVenue"></td>
+          <td><input type="text" id="existingVenue" name="existingVenue" placeholder="IEB 211" required></td>
+          <td><input type="text" id="newVenue" name="newVenue" placeholder="IEB 211" required></td>
         </tr>
         <tr>
           <th>Reason:</th>
-          <td colspan="2"><textarea placeholder="Leave your reason here" name="reason" id="reason" cols="60"></textarea></td>
+          <td colspan="2"><textarea placeholder="Leave your reason here" name="reason" id="reason" cols="60" required></textarea></td>
         </tr>
         <tr>
           <th>Documental Proof:</th>
-          <td colspan="2"><input type="file" name="documentalProof[]" id="documentalProof" multiple><br>
+          <td colspan="2"><input type="file" name="documentalProof[]" id="documentalProof" multiple required><br>
         <p style="color:grey;">**Hold down the Ctrl (windows) or Command (Mac) button to select multiple files**</p></td>
         </tr>
       </table>
       <table>
         <tr>
-          <td style="padding-right:0px;"><input type="checkbox" name="agree" id="agree"></td>
+          <td style="padding-right:0px;"><input type="checkbox" name="agree" id="agree" required></td>
           <td><b>Personal Data Protection Act (PDPA)</b></td>
         </tr>
         <tr>
@@ -284,8 +290,8 @@ $jsonSubjects = json_encode($subjects);
           </td>
         </tr>
       </table>
-      <button name="apply" type="submit" class="btn btn-info" style="margin-left:20px;">Apply</button>
-      <button name="apply" type="button" class="btn btn-secondary" style="margin-left:20px;" onclick="confirmCancel()";>Cancel</button>
+      <button name="apply" type="submit" class="btn btn-info" style="margin-left:20px; margin-right:20px; float:right;">Apply</button>
+      <button name="apply" type="button" class="btn btn-outline-secondary" style="margin-bottom:20px; float:right;" onclick="confirmCancel()";>Cancel</button>
     </form>
   </div>
   </body>

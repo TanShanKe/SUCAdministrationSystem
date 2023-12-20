@@ -23,7 +23,7 @@ $userid = $_SESSION['userid'];
 $position = $_SESSION['position'];
 
 //Get the applicant info
-$sql1 = "SELECT document_record.documentID, applicantID as studentID, student.name AS studentName, student.contactNo AS contactNo, student.batchNo AS batchNo, student.icPassport AS icPassport, reason, document, applicationDate, updateApplicationDate, afoSignature FROM document_record LEFT JOIN student ON document_record.applicantID = student.studentID WHERE document_record.documentID = '$documentID'";
+$sql1 = "SELECT document_record.documentID, applicantID as studentID, student.name AS studentName, student.contactNo AS contactNo, student.batchNo AS batchNo, student.icPassport AS icPassport, reason, document, applicationDate FROM document_record LEFT JOIN student ON document_record.applicantID = student.studentID WHERE document_record.documentID = '$documentID'";
 
 $result1 = $conn->query($sql1);
 
@@ -38,11 +38,8 @@ if ($result1->num_rows > 0) {
     $document=$row['document'];
     $reason=$row['reason'];
     $applicationDate=$row['applicationDate'];
-    $updateApplicationDate=$row['updateApplicationDate'];
-    $afoSignature=$row['afoSignature'];
   }
 }      
-
 
 if(isset($_POST['submit'])){
   $documentID = $_POST['documentID'];
@@ -50,39 +47,48 @@ if(isset($_POST['submit'])){
   date_default_timezone_set('Asia/Kuala_Lumpur');
   $date=date("Y-m-d"); 
 
-  $target_dir = "uploads/updatePaymentSlip/";
-  $totalfiles = count($_FILES['updatePaymentSlip']['name']);
+  $sql1 = "SELECT counter FROM document_record WHERE documentID = '$documentID'";
+
+  $result1 = $conn->query($sql1);
+
+  if ($result1->num_rows > 0) {
+    while ($row = $result1->fetch_assoc()) {
+      $counter=$row['counter'];
+    }
+  }  
+  $counters = $counter;
+
+  $target_dir = "uploads/paymentSlip/";
+  $totalfiles = count($_FILES['paymentSlip']['name']);
 
   for($i=0;$i<$totalfiles;$i++){    
-  $file_name = uniqid() . "_" . basename($_FILES["updatePaymentSlip"]["name"][$i]);
+  $file_name = uniqid() . "_" . basename($_FILES["paymentSlip"]["name"][$i]);
   $target_file = $target_dir . $file_name;
 
-      // Move the uploaded file to the target directory
-      if (move_uploaded_file($_FILES["updatePaymentSlip"]["tmp_name"][$i], $target_file)) {
-          echo "The file " . htmlspecialchars($file_name) . " has been uploaded.";
-          // Update your SQL query to include the file path
+  // Move the uploaded file to the target directory
+  if (move_uploaded_file($_FILES["paymentSlip"]["tmp_name"][$i], $target_file)) {
+      echo "The file " . htmlspecialchars($file_name) . " has been uploaded.";
+      // Update your SQL query to include the file path
 
-          $sql = "INSERT INTO document_updatepaymentslip (documentID, fileName) VALUES ('$documentID', '$target_file')";
-          $result=$conn->query($sql);
-      
-        } else {
-        echo "Error uploading the file.";
-        }
-
-  }
-
-  $sql = "UPDATE document_record
-      SET updateApplicationDate = '$date', updateApplicantSignature = '1'
-      WHERE documentID = '$documentID'";
+      $sql = "INSERT INTO document_paymentslip (documentID, fileName, counter, applicationDate) VALUES ('$documentID', '$target_file','$counters','$date')";
       $result=$conn->query($sql);
 
-  if ($result === TRUE) {
-    echo '<script type="text/javascript">';
-    echo 'alert("Successfully submitted!");'; 
-    echo 'window.location = "viewDocument.php";';
-    echo '</script>';
+      $sql2 = "UPDATE document_record SET waitingStatus = '1' WHERE documentID = '$documentID'";
+      $result2=$conn->query($sql2);
+
+      if ($result === TRUE) {
+        echo '<script type="text/javascript">';
+        echo 'alert("Successfully submitted!");'; 
+        echo 'window.location = "viewDocument.php";';
+        echo '</script>';
+      } else {
+          echo "Error: " . $conn->error;
+      }
+  
   } else {
-      echo "Error: " . $conn->error;
+    echo "Error uploading the file.";
+  }
+
   }
 }
 
@@ -124,9 +130,9 @@ table,td{
 
 <div class="container-fluid" style="width: 95%;" >
   <div class="d-flex justify-content-center" style=" margin-top:40px ">
-  <h3 style="margin-right: 20px">Document Application</h3>
+  <h3 style="margin-right: 20px">Document Application Result</h3>
   </div>
-    <div style="margin:40px; margin-top:15px">
+    <div style="margin:20px; margin-top:15px">
     <label for="" class="form-label" >Application Details</label>
     <table class="table">  
         <tr>
@@ -152,7 +158,7 @@ table,td{
         <tr>
           <th class="thInfo">Payment Slip</th><td class="table-light" colspan="3">
         <?php
-        $sql = "SELECT documentID, fileName FROM document_paymentslip WHERE documentID = '$documentID'";
+        $sql = "SELECT documentID, fileName FROM document_paymentslip WHERE documentID = '$documentID' AND counter = 0";
         $result = $conn->query($sql);
         $no =1;
         if ($result->num_rows > 0) {
@@ -170,35 +176,125 @@ table,td{
           <th class="thInfo">Application Date</th><td class="table-light" colspan="3"><?php echo $applicationDate; ?></td>
         </tr>
     </table>
-    <?php 
-        if($status=='Update'){
-          echo '<label for="" class="form-label" >Account and Finance Office</label>'; 
+    
+    <?php if($status != 'Pending'){
 
-          $sql = "SELECT administrator.name as name, updateAfoSignatureDate, comment FROM document_record LEFT JOIN administrator ON document_record.updateAfoID=administrator.administratorID WHERE documentID = '$documentID'";
-          $result = $conn->query($sql);
-  
-          if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-              $name=$row['name'];
-              $updateAfoSignatureDate=$row['updateAfoSignatureDate'];
-              $comment=$row['comment'];
-            }   
+    $sql3 = "SELECT counter FROM document_record WHERE documentID = '$documentID'";
+    $result3 = $conn->query($sql3);
+    if ($result3->num_rows > 0) {
+      while ($row = $result3->fetch_assoc()) {
+        $counter=$row['counter']; 
+          if($counter > 1){
+            echo '<label for="" class="form-label" >Account and Finance Office (Disapproved)</label>'; 
+          }
+    }}
+
+    $sql = "SELECT administrator.name as name, afoDate, afoComment, counter FROM document_review LEFT JOIN administrator ON document_review.afoID=administrator.administratorID WHERE documentID = '$documentID' AND afoDecision = 0 ORDER BY counter ASC";
+    $result = $conn->query($sql);
+
+      if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+          $name=$row['name'];
+          $date=$row['afoDate'];
+          $comment=$row['afoComment'];
+          $counter=$row['counter'];
+
           ?>
           <table class="table">  
           <tr>
             <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
-            <th class="thReview">Date</th><td class="table-light"><?php echo $updateAfoSignatureDate; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $date; ?></td>
           </tr> 
           <tr>
             <th class="thReview">Comment</th><td class="table-light" colspan="3"><?php echo $comment; ?></td>
           </tr>
-          </table> 
-        <?php } ?>
 
+          <?php
+    $sql1 = "SELECT documentID, fileName, counter FROM document_paymentslip WHERE documentID = '$documentID' ORDER BY counter ASC";
+    $result1 = $conn->query($sql1);
+
+    $paymentSlips = array();
+
+    if ($result1->num_rows > 0) {
+        while ($row = $result1->fetch_assoc()) {
+            $counter1 = $row['counter'];
+            $fileName = $row['fileName'];
+            // Initialize array for each counter if not exists
+            if (!isset($paymentSlips[$counter1])) {
+                $paymentSlips[$counter1] = array();
+            }
+            // Store payment slips in the array
+            $paymentSlips[$counter1][] = $fileName;
+        }
+    }
+
+    $sql2 = "SELECT documentID, counter, applicationDate FROM document_paymentslip WHERE documentID = '$documentID' GROUP BY counter ORDER BY counter ASC";
+    $result2 = $conn->query($sql2);
+    
+    $applicationDate = array();  // Initialize $applicationDate array outside the loop
+    
+    if ($result2->num_rows > 0) {
+        while ($row = $result2->fetch_assoc()) {
+            $counter2 = $row['counter'];
+            $date = $row['applicationDate'];
+    
+            // Initialize array for each counter if not exists
+            if (!isset($applicationDate[$counter2])) {
+                $applicationDate[$counter2] = array();
+            }
+    
+            $applicationDate[$counter2][] = $date;
+        }
+    }
+
+    // Iterate over each counter and display the corresponding table
+    foreach ($paymentSlips as $counter1 => $slips) {
+      if($counter1 == $counter){
+        $no = 1; ?>
+        <tr>
+            <th class="thInfo">Payment Slip</th>
+            <td class="table-light" colspan="3">
+                <?php
+                foreach ($slips as $fileName) {
+                    echo '<a href="' . $fileName . '" target="_blank">' . $no . '. Click here to view the payment slip</a> <br>';
+                    $no++;
+                }
+                ?>
+            </td>
+        </tr>
+        <tr>
+            <th class="thInfo">Application Date</th>
+            <td class="table-light" colspan="3">
+              <?php
+            foreach ($applicationDate as $counter2 => $dates) {
+              if($counter2 == $counter1){
+                foreach ($dates as $date) {
+                  echo $date;
+              }
+              }
+            } ?>
+            
+            
+            </td>
+        </tr>
+        <?php
+
+      }
+    }
+    ?>
+
+
+          </table> 
+      <?php
+        } 
+      } ?>
+
+    <?php }
+        if($status=='Update'){ ?>
         <form  action="viewDocumentResult.php" method="post" enctype="multipart/form-data">
         <br>
-        <label for="updatePaymentSlip" class="form-label" style="margin-top: 5px; margin-right: 30px;">Payment Slip: </label>
-        <input type="file" name="updatePaymentSlip[]" id="updatePaymentSlip" multiple>
+        <label for="paymentSlip" class="form-label" style="margin-top: 5px; margin-right: 30px;">Payment Slip: </label>
+        <input type="file" name="paymentSlip[]" id="paymentSlip" multiple required>
         <table style="border:none; margin-top:20px; margin-bottom:30px;">
         <tr>
           <td style="padding-right:0px; border:none;"><input type="checkbox" name="agree" id="agree" required></td>
@@ -211,72 +307,23 @@ table,td{
         </tr>
         </table>
         <input type="hidden" name="documentID" value="<?php echo $documentID; ?>">
-        <button name="submit" type="submit" class="btn btn-primary" style="margin-left:20px;">Submit</button>
-        <button name="cancel" type="button" class="btn btn-secondary" style="margin-left:20px;" onclick="confirmCancel()";>Cancel</button>
+        <button name="submit" type="submit" class="btn btn-primary" style="margin-left:20px; float:right;">Submit</button>
+        <button name="cancel" type="button" class="btn btn-outline-secondary" style="margin-left:20px; margin-bottom:20px; float:right;" onclick="confirmCancel()";>Cancel</button>
         </form>
 
         <?php
         } 
-
-        if($status=='Updating' || ($status=='Completed' && $updateApplicationDate!=null) || ($status=='Collection' && $updateApplicationDate!=null) || ($status=='Collected' && $updateApplicationDate!=null)){ 
-          echo '<label for="" class="form-label" >Account and Finance Office</label>'; 
-
-          $sql = "SELECT administrator.name as name, updateAfoSignatureDate, comment FROM document_record LEFT JOIN administrator ON document_record.updateAfoID=administrator.administratorID WHERE documentID = '$documentID'";
-          $result = $conn->query($sql);
-  
-          if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-              $name=$row['name'];
-              $updateAfoSignatureDate=$row['updateAfoSignatureDate'];
-              $comment=$row['comment'];
-            }   
-          ?>
-          <table class="table">  
-          <tr>
-            <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
-            <th class="thReview">Date</th><td class="table-light"><?php echo $updateAfoSignatureDate; ?></td>
-          </tr> 
-          <tr>
-            <th class="thReview">Comment</th><td class="table-light" colspan="3"><?php echo $comment; ?></td>
-          </tr>
-          </table> 
-        <?php } ?>
-        <label for="" class="form-label" >Updated Application Details</label>
-            <table class="table">
-            <tr>
-              <th class="thInfo">Payment Slip</th><td class="table-light" colspan="3">
-            <?php
-            $sql = "SELECT documentID, fileName FROM document_updatepaymentslip WHERE documentID = '$documentID'";
-            $result = $conn->query($sql);
-            $no =1;
-            if ($result->num_rows > 0) {
-              while ($row = $result->fetch_assoc()) {
-                $fileName=$row['fileName']; ?>
-                <a href="<?php echo $fileName; ?>" target="_blank"><?php echo $no."."; ?>Click here to view the payment slip</a> <br>
-              <?php
-                $no++;
-              }
-            }
-            ?>
-            </td>
-            </tr>
-            <tr>
-              <th class="thInfo">Application Date</th><td class="table-light" colspan="3"><?php echo $updateApplicationDate; ?></td>
-            </tr>
-           </table>
-           <?php
-        }
         
-        elseif($status=='Completed' ||$status == 'Collection' || $status == 'Collected'){
-          echo '<label for="" class="form-label" >Account and Finance Office</label>'; 
+        if($status=='Completed' ||$status == 'Collection' || $status == 'Collected'){
+          echo '<label for="" class="form-label" >Account and Finance Office (Approved)</label>'; 
 
-          $sql = "SELECT administrator.name as name, afoSignatureDate, officialReceipt FROM document_record LEFT JOIN administrator ON document_record.afoID=administrator.administratorID WHERE documentID = '$documentID'";
+          $sql = "SELECT administrator.name as name, afoDate, officialReceipt FROM document_review LEFT JOIN administrator ON document_review.afoID=administrator.administratorID LEFT JOIN document_record ON document_review.documentID=document_record.documentID WHERE document_review.documentID = '$documentID' AND afoDecision = 1 ";
           $result = $conn->query($sql);
   
           if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
               $name=$row['name'];
-              $afoSignatureDate=$row['afoSignatureDate'];
+              $date=$row['afoDate'];
               $officialReceipt=$row['officialReceipt'];
             }
   
@@ -285,7 +332,7 @@ table,td{
           <table class="table">  
           <tr>
             <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
-            <th class="thReview">Date</th><td class="table-light"><?php echo $afoSignatureDate; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $date; ?></td>
           </tr> 
           <tr>
             <th class="thReview">Official Receipt</th><td class="table-light" colspan="3"><a href="<?php echo $officialReceipt; ?>" target="_blank">Click here to view the official receipt</a></td>
@@ -294,7 +341,7 @@ table,td{
         <?php } } 
 
         if($status =='Collection'){
-          echo '<label for="" class="form-label" >AARO (Collection Date)</label>'; 
+          echo '<label for="" class="form-label" >Academic Affairs, Admission & Registration Office  (Collection Date)</label>'; 
                
              $sql = "SELECT administrator.name as name, aaroCollectionDate, collectionDate FROM document_record LEFT JOIN administrator ON document_record.aaroCollectionID=administrator.administratorID WHERE documentID = '$documentID'";
              $result = $conn->query($sql);
@@ -321,7 +368,7 @@ table,td{
              
         } if($status == 'Collected'){
 
-          echo '<label for="" class="form-label" >AARO (Collection Date)</label>'; 
+          echo '<label for="" class="form-label" >Academic Affairs, Admission & Registration Office  (Collection Date)</label>'; 
                
              $sql = "SELECT administrator.name as name, aaroCollectionDate, collectionDate FROM document_record LEFT JOIN administrator ON document_record.aaroCollectionID=administrator.administratorID WHERE documentID = '$documentID'";
              $result = $conn->query($sql);
@@ -346,7 +393,7 @@ table,td{
              <?php
              }  
 
-             echo '<label for="" class="form-label" >AARO (Collected Date)</label>'; 
+             echo '<label for="" class="form-label" >Academic Affairs, Admission & Registration Office  (Collected Date)</label>'; 
                
              $sql = "SELECT administrator.name as name, aaroCollectedDate FROM document_record LEFT JOIN administrator ON document_record.aaroCollectionID=administrator.administratorID WHERE documentID = '$documentID'";
              $result = $conn->query($sql);
@@ -371,16 +418,12 @@ table,td{
              }  ?>
  
            <?php
-         }
-
-
-
-        
-        if($status!='Update'){ ?>
-          <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
-        <?php } ?>
+         } ?>
 
     </div>
+    <?php if($status!='Update'){ ?>
+      <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; margin-right:20px; float: right;" onclick="back()";>Back</button>
+    <?php } ?>
   </div>
   </body>
 </html>

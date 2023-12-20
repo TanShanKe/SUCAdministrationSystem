@@ -20,20 +20,32 @@ if (isset($_POST['login'])) {
           $_SESSION['position'] = $position;
           if($position == 'student'){
             header("Location: main.php");
-          }elseif($position == 'aaro' || $position == 'afo' || $position == 'deanOrHod' || $position == 'iso' || $position == 'sao' || $position == 'sro' || $position == 'lib'){
-            header("Location: adminMain.php");
+          }elseif($position == 'aaro'){
+            header("Location: aaroMain.php");
           }elseif($position == 'lecturer'){
             header("Location: lecturerMain.php");
+          }elseif($position == 'deanOrHod'){
+            header("Location: hodMain.php");
+          }elseif($position == 'afo'){
+            header("Location: afoMain.php");
+          }elseif($position == 'registrar'){
+            header("Location: registrarMain.php");
+          }elseif($position == 'counseling' || $position == 'iso' || $position == 'sao' || $position == 'sro' || $position == 'lib'){
+            header("Location: adminMain.php");
           }
           exit;
       } else {
-          echo "Incorrect password!";
+        echo '<script type="text/javascript">';
+        echo 'alert("Incorrect password!");'; 
+        echo '</script>';
       }
   } else {
-      echo "User not found!";
-  }
+    echo '<script type="text/javascript">';
+    echo 'alert("User not found!");'; 
+    echo '</script>';  }
 }
 ?>
+
 
 <!doctype html>
 <html lang="en">

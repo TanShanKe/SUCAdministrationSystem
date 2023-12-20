@@ -59,7 +59,7 @@ echo "<body style='background-color:#E5F5F8'>";
     <div class="col-sm" style="margin: 20px;">
         <a href="replacement/viewReplacement.php">
             <img src="images/change.png" class="image"><br>
-            <label class="form-label font">Replacement/ Permanent Change of Class Room Venue/ Time</label>
+            <label class="form-label font">Replacement/ Permanent Change of Class Room Venue/ Time Application</label>
         </a>
     </div>
     </div>

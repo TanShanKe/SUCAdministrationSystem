@@ -9,7 +9,7 @@ if (!isset($_SESSION['userid'])) {
 }
 
 //Only dean or hod & aaro & afo can access this page
-$allowedPositions = ["deanOrHod", "aaro", "afo", "lib", "sao", "iso", "sro"];
+$allowedPositions = ["deanOrHod", "aaro", "afo", "lib", "sao", "iso", "sro", "counseling", "registrar"];
 if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
   exit();
@@ -93,7 +93,7 @@ if (isset($_POST['save'])) {
   $defermentID = $_POST['defermentID'];
   $tempRemarks = $_POST['remarks'];
 
-  if(($position == 'sao' && $saoSignature == 0) || $position == 'sro' || $position == 'lib' || $position == 'afo' || ($position == 'afo' && $saoSignature == 0)){
+  if($position == 'sao' || $position == 'sro' || $position == 'lib' || $position == 'afo' || $position == 'registrar' ){
     $tempDecision = $_POST['decision'];
     if ($tempDecision == 'yes') {
         $tempResult = 1;
@@ -112,7 +112,7 @@ if (isset($_POST['save'])) {
     }
   }
 
-  $sql = "SELECT deferment_temporary.defermentID, tempIsoRemarks, tempScholarship, tempSaoRemarks, tempCounselingRemarks, tempReturnedDocument, tempSroRemarks, tempOverdueBooks, tempLibRemarks, tempFeesOverdue, tempFees, tempReturnedDeposit, tempAfoRemarks,tempHodRemarks, tempAaroRemarks, tempRegistrarRemarks, tempRegistrarDecision, saoSignature, aaroSignature FROM deferment_temporary LEFT JOIN deferment_record ON deferment_record.defermentID=deferment_temporary.defermentID WHERE deferment_temporary.defermentID = '$defermentID'";
+  $sql = "SELECT deferment_temporary.defermentID, tempIsoRemarks, tempScholarship, tempSaoRemarks, tempCounselingRemarks, tempReturnedDocument, tempSroRemarks, tempOverdueBooks, tempLibRemarks, tempFeesOverdue, tempFees, tempReturnedDeposit, tempAfoRemarks,tempHodRemarks, tempAaroRemarks, tempRegistrarRemarks, tempRegistrarDecision FROM deferment_temporary WHERE deferment_temporary.defermentID = '$defermentID'";
   $result = $conn->query($sql);
 
   if ($result->num_rows > 0) {
@@ -133,8 +133,6 @@ if (isset($_POST['save'])) {
       $tempAaroRemarks = $row['tempAaroRemarks']; 
       $tempRegistrarRemarks = $row['tempRegistrarRemarks']; 
       $tempRegistrarDecision = $row['tempRegistrarDecision']; 
-      $saoSignature = $row['saoSignature']; 
-      $aaroSignature = $row['aaroSignature']; 
 
 
       // Check if updating an existing temporary record
@@ -142,12 +140,12 @@ if (isset($_POST['save'])) {
         $sql = "UPDATE deferment_temporary
                 SET tempIsoRemarks = '$tempRemarks'
                 WHERE defermentID = '$defermentID'";
-      }elseif ($position == 'sao' && $saoSignature == 0) {
+      }elseif ($position == 'sao') {
         $sql = "UPDATE deferment_temporary
                 SET tempScholarship = '$tempResult',
                 tempSaoRemarks = '$tempRemarks'
                 WHERE defermentID = '$defermentID'";
-      }elseif ($position == 'sao') {
+      }elseif ($position == 'counseling') {
         $sql = "UPDATE deferment_temporary
                 SET tempcounselingRemarks = '$tempRemarks'
                 WHERE defermentID = '$defermentID'";
@@ -168,15 +166,15 @@ if (isset($_POST['save'])) {
                 tempAfoRemarks = '$tempRemarks',
                 tempReturnedDeposit = '$tempResult2'
                 WHERE defermentID = '$defermentID'";
-      }elseif ($position == 'hod' ) {
+      }elseif ($position == 'deanOrHod' ) {
         $sql = "UPDATE deferment_temporary
                 SET tempHodRemarks = '$tempRemarks'
                 WHERE defermentID = '$defermentID'";
-      }elseif ($position == 'aaro' && $aaroSignature == 0 ) {
+      }elseif ($position == 'aaro') {
         $sql = "UPDATE deferment_temporary
                 SET tempAaroRemarks = '$tempRemarks'
                 WHERE defermentID = '$defermentID'";
-      }elseif ($position == 'aaro') {
+      }elseif ($position == 'registrar') {
         $sql = "UPDATE deferment_temporary
                 SET tempRegistrarRemarks = '$tempRemarks',
                 tempRegistrarDecision = '$tempResult'
@@ -190,13 +188,13 @@ if (isset($_POST['save'])) {
     $sql = "INSERT INTO deferment_temporary 
             (defermentID, tempIsoRemarks)
             VALUES ('$defermentID', '$tempRemarks')";
-  }elseif ($position == 'sao' && $saoSignature == 0) {
+  }elseif ($position == 'sao') {
     $sql = "INSERT INTO deferment_temporary 
             (defermentID, tempScholarship, tempSaoRemarks )
             VALUES ('$defermentID', '$tempDecision', '$tempRemarks')";
-  }elseif ($position == 'sao') {
+  }elseif ($position == 'counseling') {
     $sql = "INSERT INTO deferment_temporary 
-            (defermentID, counselingRemarks)
+            (defermentID, tempCounselingRemarks)
             VALUES ('$defermentID', '$tempRemarks')";
   }elseif ($position == 'sro' ) {
     $sql = "INSERT INTO deferment_temporary 
@@ -210,15 +208,15 @@ if (isset($_POST['save'])) {
     $sql = "INSERT INTO deferment_temporary 
             (defermentID, tempFeesOverdue, tempFees, tempAfoRemarks, tempReturnedDeposit )
             VALUES ('$defermentID', '$tempDecision', '$tempFee', '$tempRemarks', '$tempDecision2')";
-  }elseif ($position == 'hod' ) {
+  }elseif ($position == 'deanOrHod' ) {
     $sql = "INSERT INTO deferment_temporary 
             (defermentID, tempHodRemarks)
             VALUES ('$defermentID', '$tempRemarks')";
-  }elseif ($position == 'aaro' && $aaroSignature == 0 ) {
+  }elseif ($position == 'aaro') {
     $sql = "INSERT INTO deferment_temporary 
             (defermentID, tempAaroRemarks)
             VALUES ('$defermentID', '$tempRemarks')";
-  }elseif ($position == 'aaro') {
+  }elseif ($position == 'registrar') {
     $sql = "INSERT INTO deferment_temporary 
             (defermentID, tempRegistrarRemarks, tempRegistrarDecision)
             VALUES ('$defermentID', '$tempRemarks',  '$tempDecision')";
@@ -247,46 +245,7 @@ if ($result === TRUE) {
     date_default_timezone_set('Asia/Kuala_Lumpur');
     $date=date("Y-m-d"); 
 
-    $sql2 = "SELECT saoSignature, counselingSignature FROM deferment_record WHERE defermentID = '$defermentID'";
-    $result2 = $conn->query($sql2);
-    if ($result2->num_rows > 0) {
-        while ($row = $result2->fetch_assoc()) {
-            $saoSignature=$row['saoSignature'];
-            $counselingSignature=$row['counselingSignature'];
-
-        if(($position =='sao' && $saoSignature == 0)){
-          $decision = $_POST['decision'];
-          if ($decision == 'yes') {
-              $decisionResult = 1;
-          } elseif ($decision == 'no') {
-              $decisionResult = 0;
-          }
-        } 
-
-        if($position == 'sao'){   
-          if($saoSignature == 0){
-              $sql = "UPDATE deferment_record
-              SET scholarship = '$decisionResult',
-                  saoRemarks = '$remarks',
-                  saoSignature = '1',
-                  saoID = '$userid',
-                  saoDate = '$date'
-              WHERE defermentID = '$defermentID'";
-              $result=$conn->query($sql);
-          }elseif($counselingSignature == 0){
-              $sql = "UPDATE deferment_record
-              SET counselingRemarks = '$remarks',
-                  counselingSignature = '1',
-                  counselingID = '$userid',
-                  counselingDate = '$date'
-              WHERE defermentID = '$defermentID'";
-              $result=$conn->query($sql);
-          }
-      }
-      }
-    }  
-
-    if($position =='sro' || $position =='lib'){
+    if($position =='sro' || $position =='lib' || $position =='sao' || $position =='registrar'){
         $decision = $_POST['decision'];
         if ($decision == 'yes') {
             $decisionResult = 1;
@@ -315,6 +274,23 @@ if ($result === TRUE) {
           isoSignature = '1',
           isoID = '$userid',
           isoDate = '$date'
+      WHERE defermentID = '$defermentID'";
+      $result=$conn->query($sql);
+    } elseif($position == 'sao'){   
+      $sql = "UPDATE deferment_record
+      SET scholarship = '$decisionResult',
+          saoRemarks = '$remarks',
+          saoSignature = '1',
+          saoID = '$userid',
+          saoDate = '$date'
+      WHERE defermentID = '$defermentID'";
+      $result=$conn->query($sql);
+     }elseif($position == 'counseling'){
+      $sql = "UPDATE deferment_record
+      SET counselingRemarks = '$remarks',
+          counselingSignature = '1',
+          counselingID = '$userid',
+          counselingDate = '$date'
       WHERE defermentID = '$defermentID'";
       $result=$conn->query($sql);
     } elseif($position == 'sro'){
@@ -354,46 +330,24 @@ if ($result === TRUE) {
             hodDate = '$date'
         WHERE defermentID = '$defermentID'";
         $result=$conn->query($sql);
-    } 
-
-    $sql3 = "SELECT aaroSignature, registrarSignature FROM deferment_record WHERE defermentID = '$defermentID'";
-    $result3 = $conn->query($sql3);
-    if ($result3->num_rows > 0) {
-        while ($row = $result3->fetch_assoc()) {
-            $aaroSignature=$row['aaroSignature'];
-            $registrarSignature=$row['registrarSignature'];
-
-        if(($position =='aaro' && $aaroSignature == 1)){
-          $decision = $_POST['decision'];
-          if ($decision == 'yes') {
-              $decisionResult = 1;
-          } elseif ($decision == 'no') {
-              $decisionResult = 0;
-          }
-        } 
-
-        if($position == 'aaro'){   
-          if($aaroSignature == 0){
-            $sql = "UPDATE deferment_record
-            SET aaroRemarks = '$remarks',
-                aaroSignature = '1',
-                aaroID = '$userid',
-                aaroDate = '$date'
-            WHERE defermentID = '$defermentID'";
-            $result=$conn->query($sql);
-          }elseif($registrarSignature == 0){
-            $sql = "UPDATE deferment_record
-            SET registrarRemarks = '$remarks',
-                registrarSignature = '1',
-                registrarDecision = '$decisionResult',
-                registrarID = '$userid',
-                registrarDate = '$date'
-            WHERE defermentID = '$defermentID'";
-            $result=$conn->query($sql);
-          }
-      }
-      }
-    }  
+    } elseif($position == 'aaro'){
+      $sql = "UPDATE deferment_record
+      SET aaroRemarks = '$remarks',
+          aaroSignature = '1',
+          aaroID = '$userid',
+          aaroDate = '$date'
+      WHERE defermentID = '$defermentID'";
+      $result=$conn->query($sql);
+    }elseif($position == 'registrar'){
+      $sql = "UPDATE deferment_record
+      SET registrarRemarks = '$remarks',
+          registrarSignature = '1',
+          registrarDecision = '$decisionResult',
+          registrarID = '$userid',
+          registrarDate = '$date'
+      WHERE defermentID = '$defermentID'";
+      $result=$conn->query($sql);
+    }
 
     if ($result === TRUE) {
       echo '<script type="text/javascript">';
@@ -447,9 +401,9 @@ function toggleInput() {
     var no = document.getElementById("no");
 
     if (yes.checked) {
-      existingDay.disabled = false;
+      fees.disabled = false;
     } else if(no.checked){
-      existingDate.disabled = true;
+      fees.disabled = true;
     }
   }
   </script>
@@ -458,7 +412,7 @@ function toggleInput() {
   <div class="d-flex justify-content-center" style=" margin-top:40px ">
   <h3 style="margin-right: 20px">Resumption of Studies Application</h3>
   </div>
-    <div class="row" style="margin:40px; margin-top:15px">
+    <div class="row" style="margin:20px; margin-top:15px">
     <label for="" class="form-label" >Application Details</label>
     <table class="table">  
         <tr>
@@ -666,6 +620,11 @@ function toggleInput() {
             }
             $fees=$row['fees'];
             $returnedDeposit=$row['returnedDeposit'];
+            if($returnedDeposit == 1){
+              $returnedDeposits = 'Yes';
+            }elseif($returnedDeposit == 0){
+              $returnedDeposits = 'No';
+            }
           }
           ?>
         <table class="table">  
@@ -680,7 +639,7 @@ function toggleInput() {
             <th class="thReview">Remarks / Suggestions</th><td class="table-light " colspan="3"><?php echo $remarks; ?></td>
           </tr> 
           <tr>
-            <th class="thReview">Returned Deposit</th><td class="table-light " colspan="3"><?php echo $returnedDeposit; ?></td>
+            <th class="thReview">Returned Deposit</th><td class="table-light " colspan="3"><?php echo $returnedDeposits; ?></td>
           </tr> 
       </table>
       <?php
@@ -690,7 +649,7 @@ function toggleInput() {
 
     if($hodSignature == 1){
       echo '<label for="" class="form-label" >Faculty (Head of Department / Dean)</label>';
-      $sql = "SELECT administrator.name AS name, hodRemarks AS remarks, hodDate AS acknowledgeDate FROM deferment_record left join administrator on deferment_record.afoID=administrator.administratorID WHERE defermentID = '$defermentID'";
+      $sql = "SELECT lecturer.name AS name, hodRemarks AS remarks, hodDate AS acknowledgeDate FROM deferment_record left join lecturer on deferment_record.hodID=lecturer.lecturerID WHERE defermentID = '$defermentID'";
       $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -715,7 +674,7 @@ function toggleInput() {
     } 
 
     if($aaroSignature == 1){
-      echo '<label for="" class="form-label" >Academic Affairs, Admission & Registration Office (Officer)</label>';
+      echo '<label for="" class="form-label" >Academic Affairs, Admission & Registration Office</label>';
       $sql = "SELECT administrator.name AS name, aaroRemarks AS remarks, aaroDate AS acknowledgeDate, registrarDecision FROM deferment_record left join administrator on deferment_record.aaroID=administrator.administratorID WHERE defermentID = '$defermentID'";
       $result = $conn->query($sql);
 
@@ -752,9 +711,9 @@ function toggleInput() {
             $acknowledgeDate=$row['acknowledgeDate'];
             $type=$row['registrarDecision'];
             if($type == 1){
-              $registrarDecision = 'Yes';
+              $registrarDecision = 'Approved';
             }elseif($type == 0){
-              $registrarDecision = 'No';
+              $registrarDecision = 'Disapproved';
             }
           }
           ?>
@@ -779,7 +738,7 @@ function toggleInput() {
       ?><form  action="reviewDeferment.php" method="post" enctype="multipart/form-data"><?php
       if($position == 'iso'){
         echo '<label class="form-label" style="margin-top: 30px; margin-left: 20px; font-size: 110%"><b>International Student Office</b></label>';
-      } elseif($position == 'sao' && $saoSignature == 0){ ?>
+      } elseif($position == 'sao'){ ?>
         <div class="row" style="margin: 20px; margin-top:10px">
         <label for="id" class="form-label" style="margin-top: 3px;">Scholarship Holder:</label>
         <div class="form-check form-check-inline" style="margin-left: 30px;">
@@ -787,7 +746,7 @@ function toggleInput() {
           <label class="form-check-label" for="inlineRadio1">Yes</label>
         </div>
         <div class="form-check form-check-inline" style="margin-left: 10px;">
-          <input class="form-check-input" type="radio" name="decision" id="no" value="no"
+          <input class="form-check-input" type="radio" name="decision" id="no" value="no" 
           <?php
             if ($resultTemp->num_rows > 0) {
             if ($tempScholarship == 0 && $tempScholarship != null) {
@@ -840,17 +799,17 @@ function toggleInput() {
           <div class="row" style="margin: 20px; margin-top:10px">
             <label for="id" class="form-label" style="margin-top: 3px;">School fees overdue:</label>
             <div class="form-check form-check-inline" style="margin-left: 30px;">
-              <input class="form-check-input" type="radio" name="decision" id="yes" value="yes"checked>
+              <input class="form-check-input" type="radio" name="decision" id="yes" value="yes" onclick="toggleInput()"checked>
               <label class="form-check-label" for="inlineRadio1">Yes</label>
               <label style="margin-left: 20px; margin-top:7px; margin-right:2px;" >RM</label>
               <input type="text" id="fees" name="fees" value="<?php
                if ($resultTemp->num_rows > 0) {
               if($tempFees != null){
                 echo $tempFees;} }
-                ?>"> 
+                ?>" required> 
             </div>
             <div class="form-check form-check-inline" style="margin-left: 10px;">
-              <input class="form-check-input" type="radio" name="decision" id="no" value="no"
+              <input class="form-check-input" type="radio" name="decision" id="no" value="no" onclick="toggleInput()"
               <?php
               if ($resultTemp->num_rows > 0) {
               if ($tempFeesOverdue == 0 && $tempFeesOverdue != null) {
@@ -865,13 +824,13 @@ function toggleInput() {
         <div class="row" style="margin: 20px;">
           <label for="remarks" style="margin-right:10px">Remarks / Suggestions:</label>
           <div class="col-md-10">
-            <textarea class="form-control" placeholder="Leave remarks / suggestions here" name="remarks" id="remarks"><?php
+            <textarea class="form-control" placeholder="Leave remarks / suggestions here" name="remarks" id="remarks" required><?php
             if ($resultTemp->num_rows > 0) {
               if($position == 'iso' && $tempIsoRemarks != null){
                 echo $tempIsoRemarks;} 
-              elseif($position == 'sao' && $saoSignature == 0 && $tempSaoRemarks != null){
+              elseif($position == 'sao' && $tempSaoRemarks != null){
                 echo $tempSaoRemarks;} 
-              elseif($position == 'sao' && $tempCounselingRemarks != null){
+              elseif($position == 'counseling' && $tempCounselingRemarks != null){
                 echo $tempCounselingRemarks;} 
               elseif($position == 'sro' && $tempSroRemarks != null){
                 echo $tempSroRemarks;} 
@@ -879,12 +838,12 @@ function toggleInput() {
                 echo $tempLibRemarks;} 
               elseif($position == 'afo' && $tempAfoRemarks != null){
                 echo $tempAfoRemarks;} 
-              elseif($position == 'hod' && $tempHodRemarks != null){
+              elseif($position == 'deanOrHod' && $tempHodRemarks != null){
                 echo $tempHodRemarks;} 
-              elseif($position == 'aaro' && $aaroSignature == 0 && $tempAaroRemarks != null){
+              elseif($position == 'aaro' && $tempAaroRemarks != null){
                 echo $tempAaroRemarks;} 
-              elseif($position == 'aaro' && $tempRegistrarDecision != null){
-                echo $tempRegistrarDecision;}      
+              elseif($position == 'registrar' && $tempRegistrarDecision != null){
+                echo $tempRegistrarRemarks;}      
               }
               ?></textarea>
           </div>
@@ -907,12 +866,12 @@ function toggleInput() {
               <label class="form-check-label" for="inlineRadio2">No</label>
             </div>
           </div> 
-          <?php } elseif($position == 'aaro' && $aaroSignature == 1){ ?>
+          <?php } elseif($position == 'registrar'){ ?>
           <div class="row" style="margin: 20px; margin-top:10px">
             <label for="id" class="form-label" style="margin-top: 3px;">Decision:</label>
             <div class="form-check form-check-inline" style="margin-left: 30px;">
               <input class="form-check-input" type="radio" name="decision" id="yes" value="yes"checked>
-              <label class="form-check-label" for="inlineRadio1">Yes</label>
+              <label class="form-check-label" for="inlineRadio1">Approved</label>
             </div>
             <div class="form-check form-check-inline" style="margin-left: 10px;">
               <input class="form-check-input" type="radio" name="decision" id="no" value="no"
@@ -922,7 +881,7 @@ function toggleInput() {
                   echo 'checked';
               }}
               ?>>
-              <label class="form-check-label" for="inlineRadio2">No</label>
+              <label class="form-check-label" for="inlineRadio2">Disapproved</label>
             </div>
           </div>
           <?php }
@@ -937,17 +896,18 @@ function toggleInput() {
         <p>I voluntarily acknowledge and accept full responsibility for the decision I am about to make, understanding that my choice will have significant consequences.</p>
         </div>
         <input type="hidden" name="defermentID" value="<?php echo $defermentID; ?>">
-        <button name="submit" type="submit" class="btn btn-primary" style="margin-left:20px;";>Submit</button>
-        <button name="save" type="submit" class="btn btn-info" style="margin-left:20px;" onclick="showSuccessMessage()";>Save</button>
-        <button name="cancel" type="button" class="btn btn-secondary" style="margin-left:20px;" onclick="confirmCancel()";>Cancel</button>
+        <button name="submit" type="submit" class="btn btn-primary" style="margin-left:20px; float:right;";>Submit</button>
+        <button name="save" type="submit" class="btn btn-outline-info" style="margin-left:20px; float:right;" onclick="showSuccessMessage()";>Save</button>
+        <button name="cancel" type="button" class="btn btn-outline-secondary" style="margin-left:20px; float:right;" onclick="confirmCancel()";>Cancel</button>
       </form>
       <?php
-    }elseif($status == 'Completed'){ ?>
-
-      <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
+    }elseif($status == 'Completed'||$status == 'Approved'||$status == 'Disapproved'){ ?>
+    </div>
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; margin-right:20px; float:right;" onclick="back()";>Back</button>
       
     <?php } ?>
   
+
     </div>
   </body>
 </html>

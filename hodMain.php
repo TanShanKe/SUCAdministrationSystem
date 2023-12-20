@@ -52,27 +52,13 @@ echo "<body style='background-color:#E5F5F8'>";
     <p>Logged in as <?php echo $position; ?>, <?php echo $name; ?></p>
   <div class="row" >
     <div class="col-sm" style="margin: 20px;">
-        <a href="resumption/viewResumptionApplied.php">
-            <img src="images/subjects.png" class="image">
-            <label class="form-label font">Subject Registration Application</label>
-        </a>
-    </div>
-    <div class="col-sm" style="margin: 20px;">
-        <a href="leave/viewLeaveApplied.php">
-            <img src="images/leave.png" class="image"><br>
-            <label class="form-label font">Incident & Funerary Leave Application</label>
-        </a>
-    </div>
-    <div class="col-sm" style="margin: 20px;">
         <a href="replacement/viewReplacementApplied.php">
             <img src="images/change.png" class="image"><br>
-            <label class="form-label font">Replacement/ Permanent Change of Class Room Venue/ Time</label>
+            <label class="form-label font">Replacement/ Permanent Change of Class Room Venue/ Time Application</label>
         </a>
     </div>
-    </div>
-    <div class="row">
     <div class="col-sm" style="margin: 20px;">
-        <a href="resumption/viewResumptionApplied.php">
+        <a href="deferment/viewDefermentApplied.php">
             <img src="images/deferment.png" class="image"><br>
             <label class="form-label font">Deferment/ Withdrawal Application</label>
         </a>

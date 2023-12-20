@@ -10,7 +10,7 @@ if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'student') {
 
 $resumptionID = $_GET['resumptionID'];
 
-$sql = "SELECT student.name AS name, student.batchNo AS batchNo, applicantID, applicationDate, yearOfResumption, semOfResumption, yearOfDeferment, semOfDeferment, aaroAcknowledge, aaroComment, afoAcknowledge, afoComment, deanOrHeadAcknowledge, deanOrHeadComment FROM resumption_of_studies_record left join student on resumption_of_studies_record.applicantID=student.studentID WHERE resumptionID = '$resumptionID'";
+$sql = "SELECT student.name AS name, student.batchNo AS batchNo, applicantID, applicationDate, yearOfResumption, semOfResumption, yearOfDeferment, semOfDeferment FROM resumption_of_studies_record left join student on resumption_of_studies_record.applicantID=student.studentID WHERE resumptionID = '$resumptionID'";
 
 $result = $conn->query($sql);
 
@@ -24,30 +24,22 @@ if ($result->num_rows > 0) {
     $semOfResumption=$row['semOfResumption'];
     $yearOfDeferment=$row['yearOfDeferment'];
     $semOfDeferment=$row['semOfDeferment'];
-    $aaroAcknowledge = $row['aaroAcknowledge'];
-    $aaroComment = $row['aaroComment'];
-    $afoAcknowledge = $row['afoAcknowledge'];
-    $afoComment = $row['afoComment'];
-    $deanOrHeadAcknowledge = $row['deanOrHeadAcknowledge'];
-    $deanOrHeadComment = $row['deanOrHeadComment'];
-
-    if ($deanOrHeadAcknowledge == 0) {
-      $deanOrHeadAcknowledge = 'Not Acknowledge';
-    } if ($deanOrHeadAcknowledge == 1) {
-      $deanOrHeadAcknowledge = 'Acknowledge';
-    } 
-    if ($afoAcknowledge == 0) {
-      $afoAcknowledge = 'Not Acknowledge';
-    }elseif ($afoAcknowledge == 1) {
-      $afoAcknowledge = 'Acknowledge';
-    }
-    if ($aaroAcknowledge == 0) {
-      $aaroAcknowledge = 'Not Acknowledge';
-    }elseif ($aaroAcknowledge == 1) {
-      $aaroAcknowledge = 'Acknowledge';
-    }
   }
-}            
+}   
+
+//Get review info
+$sql2 = "SELECT deanOrHeadSignature, aaroSignature, afoSignature, registrarSignature FROM resumption_of_studies_record WHERE resumptionID = '$resumptionID'";
+
+$result2 = $conn->query($sql2);
+
+if ($result2->num_rows > 0) {
+    while ($row = $result2->fetch_assoc()) {
+        $deanOrHeadSignature=$row['deanOrHeadSignature'];
+        $afoSignature=$row['afoSignature'];
+        $aaroSignature=$row['aaroSignature'];
+        $registrarSignature=$row['registrarSignature'];
+  }
+}
 
 include '../header.php';
 echo "<body style='background-color:#E5F5F8'>";
@@ -83,7 +75,7 @@ table,td{
   <div class="d-flex justify-content-center" style=" margin-top:40px ">
   <h3 style="margin-right: 20px">Resumption of Studies Application Result</h3>
   </div>
-    <div class="row" style="margin:40px; margin-top:15px">
+    <div class="row" style="margin:20px; margin-top:15px">
     <label for="" class="form-label" >Application Details</label>
     <table class="table">  
         <tr>
@@ -106,35 +98,142 @@ table,td{
           <th class="thInfo">Sem of Resumption</th><td class="table-light"><?php echo $semOfResumption; ?></td>
         </tr>
     </table>
-    <label for="" class="form-label" >Faculty (Head of Department / Dean)</label>
-    <table class="table">  
+
+    <?php
+
+    if($deanOrHeadSignature == 1){
+      echo '<label for="" class="form-label" >Faculty (Head of Department / Dean)</label>';
+      $sql1 = "SELECT lecturer.name AS name, deanOrHeadID AS id, deanOrHeadComment AS comment, deanOrHeadAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join lecturer on resumption_of_studies_record.deanOrHeadID=lecturer.lecturerID WHERE resumptionID = '$resumptionID'";
+      $result1 = $conn->query($sql1);
+
+      if ($result1->num_rows > 0) {
+        while ($row = $result1->fetch_assoc()) {
+          $name=$row['name'];
+          $id=$row['id'];
+          $comment=$row['comment'];
+          $acknowledgeDate=$row['acknowledgeDate'];
+        }
+        ?>
+      <table class="table">  
         <tr>
-          <th class="thReview">Acknowledge / <br>Not Acknowledge</th><td class="table-light"><?php echo $deanOrHeadAcknowledge; ?></td>
+          <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
         </tr> 
         <tr>
-          <th class="thReview">Comment / Remarks</th><td class="table-light"><?php echo $deanOrHeadComment; ?></td>
-        </tr> 
-    </table>
-    <table class="table">  
-    <label for="" class="form-label" >Account & Finance Office</label>
-        <tr>
-          <th class="thReview">Acknowledge / <br>Not Acknowledge</th><td class="table-light"><?php echo $afoAcknowledge; ?></td>
+          <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+          <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
         </tr> 
         <tr>
-          <th class="thReview">Comment / Remarks</th><td class="table-light"><?php echo $afoComment; ?></td>
+          <th class="thReview">Date</th><td class="table-light " colspan="3"><?php echo $acknowledgeDate; ?></td>
+        </tr> 
+    </table> <?php
+      }
+    }
+
+    if($afoSignature == 1){
+      echo '<label for="" class="form-label" >Account & Finance Office</label>';
+      $sql3 = "SELECT administrator.name AS name, afoID AS id, afoComment AS comment, afoAcknowledgeDate AS acknowledgeDate, afoFees AS fees FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.afoID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
+      $result3 = $conn->query($sql3);
+
+      if ($result3->num_rows > 0) {
+        while ($row = $result3->fetch_assoc()) {
+          $name=$row['name'];
+          $id=$row['id'];
+          $comment=$row['comment'];
+          $fees=$row['fees'];
+          $acknowledgeDate=$row['acknowledgeDate'];
+        }
+        ?>
+
+      <table class="table"> 
+        <tr>
+          <th class="thReview">Fees</th><td class="table-light " colspan="3"><?php echo $fees; ?></td>
         </tr>  
-    </table>
-    <table class="table"> 
-    <label for="" class="form-label" >Academic Affairs & Registration Office</label>
         <tr>
-          <th class="thReview">Acknowledge / <br>Not Acknowledge</th><td class="table-light"><?php echo $aaroAcknowledge; ?></td>
-        </tr>
+          <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
+        </tr> 
         <tr>
-          <th class="thReview">Comment / Remarks</th><td class="table-light"><?php echo $aaroComment; ?></td>
-        </tr>   
+          <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+          <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
+        </tr> 
+        <tr>
+          <th class="thReview">Date</th><td class="table-light " colspan="3"><?php echo $acknowledgeDate; ?></td>
+        </tr> 
     </table>
-    <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
+    <?php
+      }
+    }
+
+    if($aaroSignature == 1){
+      echo '<label for="" class="form-label" >Academic Affairs, Admission & Registration Office</label>';
+      $sql3 = "SELECT administrator.name AS name, aaroID AS id, aaroComment AS comment, aaroAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.aaroID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
+      $result3 = $conn->query($sql3);
+
+      if ($result3->num_rows > 0) {
+        while ($row = $result3->fetch_assoc()) {
+          $name=$row['name'];
+          $id=$row['id'];
+          $comment=$row['comment'];
+          $acknowledgeDate=$row['acknowledgeDate'];
+        }
+        ?>
+
+      <table class="table">  
+        <tr>
+          <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
+        </tr> 
+        <tr>
+          <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+          <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
+        </tr> 
+        <tr>
+          <th class="thReview">Date</th><td class="table-light " colspan="3"><?php echo $acknowledgeDate; ?></td>
+        </tr> 
+    </table>
+    <?php
+      } 
+    }   
+
+    if($registrarSignature == 1){
+      echo '<label for="" class="form-label" >Academic Affairs, Admission & Registration Office (Registrar)</label>';
+      $sql3 = "SELECT administrator.name AS name, registrarID AS id, registrarAcknowledge AS decision, registrarComment AS comment, registrarAcknowledgeDate AS acknowledgeDate FROM resumption_of_studies_record left join administrator on resumption_of_studies_record.registrarID=administrator.administratorID WHERE resumptionID = '$resumptionID'";
+      $result3 = $conn->query($sql3);
+
+      if ($result3->num_rows > 0) {
+        while ($row = $result3->fetch_assoc()) {
+          $name=$row['name'];
+          $id=$row['id'];
+          $decision=$row['decision'];
+          $comment=$row['comment'];
+          $acknowledgeDate=$row['acknowledgeDate'];
+          if($decision == 1){
+            $acknowledge = 'Approved';
+          }elseif($decision == 0){
+            $acknowledge = 'Disapproved';
+          }
+        }
+        ?>
+      <table class="table">  
+        <tr>
+          <th class="thReview">Decision</th><td class="table-light " colspan="3"><?php echo $acknowledge; ?></td>
+        </tr> 
+        <tr>
+          <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
+        </tr> 
+        <tr>
+          <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+          <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
+        </tr> 
+        <tr>
+          <th class="thReview">Date</th><td class="table-light " colspan="3"><?php echo $acknowledgeDate; ?></td>
+        </tr> 
+    </table> <?php
+      } 
+    }
+
+    ?>
+
     </div>
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; margin-right:20px; float: right;" onclick="back()";>Back</button>
   </div>
 
   </body>

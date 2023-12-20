@@ -7,7 +7,7 @@ if (!isset($_SESSION['userid'])) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
 }
 
-$allowedPositions = ["lib", "sao", "iso", "sro", "counseling"];
+$allowedPositions = ["registrar"];
 if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPositions)) {
   header("Location: http://localhost/sucadministrationsystem/index.php");
   exit();
@@ -15,6 +15,7 @@ if (!isset($_SESSION['userid']) || !in_array($_SESSION['position'], $allowedPosi
 
 $userid = $_SESSION['userid'];
 $position = $_SESSION['position'];
+
 
 $sql = "SELECT name FROM administrator WHERE administratorID  = '$userid'";
 
@@ -54,6 +55,12 @@ echo "<body style='background-color:#E5F5F8'>";
         <a href="deferment/viewDefermentApplied.php">
             <img src="images/deferment.png" class="image"><br>
             <label class="form-label font">Deferment/ Withdrawal Application</label>
+        </a>
+    </div>
+    <div class="col-sm" style="margin: 20px;">
+        <a href="resumption/viewResumptionApplied.php">
+            <img src="images/resumption.png" class="image"><br>
+            <label class="form-label font">Resumption of Studies Application</label>
         </a>
     </div>
     </div>

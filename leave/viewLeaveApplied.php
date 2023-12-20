@@ -40,7 +40,7 @@ echo "<body style='background-color:#E5F5F8'>";
       location.href = '../lecturerMain.php';
     <?php } ?>
     <?php if ($position == 'aaro') { ?>
-      location.href = '../adminMain.php';
+      location.href = '../aaroMain.php';
     <?php } ?>
   }
 </script>
@@ -58,7 +58,7 @@ table,td{
 </style>
 <div style="margin: 40px;">
     <div class="d-flex justify-content-center">
-        <h3 style="margin-right: 20px">Student Incident & Funerary Leave Application</h3>
+        <h3 style="margin-right: 20px">Incident & Funerary Leave Application</h3>
     </div>
     <form  action="" method="post" enctype="multipart/form-data">
       <div class="row justify-content-center" style="margin: 20px;">
@@ -82,14 +82,13 @@ table,td{
           <option value="acknowledge" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'acknowledge') echo 'selected="selected"'; ?>>Acknowledge</option>
           <option value="completed" <?php if (isset($_POST['selected_status']) && $_POST['selected_status'] == 'completed') echo 'selected="selected"'; ?>>Completed</option>
         </select>
-        <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+        <button name="check" type="submit" class="btn btn-outline-secondary" style="margin-left:20px;">Check</button>
         </div>
         <div class="row justify-content-center" style="margin: 20px;">
         <input name="keyword" type="search" style="margin-right: 20px;" placeholder="Search" >
         <button name="search" class="btn btn-outline-secondary" type="submit">Search</button>
       </div>
     </form>
-  </div>
 </div>
 
 <div class="container-fluid" style="width: 90%;" >
@@ -136,11 +135,11 @@ table,td{
       if (isset($_POST['search']) && !empty($_POST['keyword'])) {
         $rowNumber = 1;
         $k=$_POST['keyword'];
-        $keyword=" where (leave_subject.leaveID like '%".$k."%' or leave_record.applicantID like '%".$k."%')";  
+        $keyword=" where (leave_subject.leaveID like '%".$k."%' or leave_record.applicantID like '%".$k."%' or leave_record.applicationDate like '%".$k."%')";  
         $sql = "SELECT lecturerSignature, leave_record.applicantID, leave_record.leaveID, leave_record.applicationDate, leave_record.aaroSignature FROM leave_subject LEFT JOIN leave_record on leave_subject.leaveID=leave_record.leaveID".$keyword;
       }else if (isset($_POST['search']) && empty($_POST['keyword'])) {
         echo '<script type="text/javascript">
-        alert("Please insert application id to search!");
+        alert("Please insert application id, applicant id or application date to search!");
         </script>';
       }
 
@@ -164,7 +163,7 @@ table,td{
         SUM(CASE WHEN leave_subject.lecturerSignature = 0 OR leave_subject.lecturerSignature IS NULL THEN 1 ELSE 0 END) = 0";
       }
 
-      $sql .= " ORDER BY applicationDate DESC";
+      $sql .= " ORDER BY leave_record.leaveID DESC";
       
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
@@ -206,7 +205,8 @@ table,td{
         }
         ?> 
     </table>
-    <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
-      </div>
+    </div>
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; float: right;" onclick="back()";>Back</button>
+   </div>
   </body>
 </html>

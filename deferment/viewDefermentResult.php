@@ -88,7 +88,7 @@ table,td{
   <div class="d-flex justify-content-center" style=" margin-top:40px ">
   <h3 style="margin-right: 20px">Deferment/ Withdrawal Application Result</h3>
   </div>
-  <div class="row" style="margin:40px; margin-top:15px">
+  <div class="row" style="margin:20px; margin-top:15px">
     <label for="" class="form-label" >Application Details</label>
     <table class="table">  
         <tr>
@@ -297,6 +297,11 @@ table,td{
                   }
                   $fees=$row['fees'];
                   $returnedDeposit=$row['returnedDeposit'];
+                  if($returnedDeposit == 1){
+                    $returnedDeposits = 'Yes';
+                  }elseif($returnedDeposit == 0){
+                    $returnedDeposits = 'No';
+                  }
                 }
                 ?>
               <table class="table">  
@@ -311,7 +316,7 @@ table,td{
                   <th class="thReview">Remarks / Suggestions</th><td class="table-light " colspan="3"><?php echo $remarks; ?></td>
                 </tr> 
                 <tr>
-                  <th class="thReview">Returned Deposit</th><td class="table-light " colspan="3"><?php echo $returnedDeposit; ?></td>
+                  <th class="thReview">Returned Deposit</th><td class="table-light " colspan="3"><?php echo $returnedDeposits; ?></td>
                 </tr> 
             </table>
             <?php
@@ -321,7 +326,7 @@ table,td{
     
           if($hodSignature == 1){
             echo '<label for="" class="form-label" >Faculty (Head of Department / Dean)</label>';
-            $sql = "SELECT administrator.name AS name, hodRemarks AS remarks, hodDate AS acknowledgeDate FROM deferment_record left join administrator on deferment_record.afoID=administrator.administratorID WHERE defermentID = '$defermentID'";
+            $sql = "SELECT lecturer.name AS name, hodRemarks AS remarks, hodDate AS acknowledgeDate FROM deferment_record left join lecturer on deferment_record.hodID=lecturer.lecturerID WHERE defermentID = '$defermentID'";
             $result = $conn->query($sql);
     
               if ($result->num_rows > 0) {
@@ -402,15 +407,12 @@ table,td{
                 </tr>
             </table>
             <?php
-            } 
-    
+            }   
           } 
-        
-        
         ?> 
-        
-    <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
+      
     </div>
+      <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; margin-right:20px; float: right;" onclick="back()";>Back</button>
   </div>
 
   </body>

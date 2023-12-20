@@ -11,7 +11,7 @@ if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'lecturer') {
 $changeClassID = $_GET['changeClassID'];
 $status = $_GET['status'];
 
-$sql = "SELECT change_class_record.subjectCode AS subjectCode, typeOfChange, existingDate, existingDay, date_format(existingStartTime,'%H:%i') AS existingStartTime, date_format(existingEndTime,'%H:%i') AS existingEndTime, existingVenue, newDate, newDay, date_format(newStartTime,'%H:%i') AS newStartTime, date_format(newEndTime,'%H:%i') AS newEndTime, newVenue, reason, subject.name AS subjectName, lecturer.name AS lecturerName, applicant.name AS applicantName, applicationDate, aaroAcknowledge, aaroComment, aaroAcknowledgeDate, deanOrHeadAcknowledge, deanOrHeadComment, deanOrHeadAcknowledgeDate, documentalProof FROM change_class_record LEFT JOIN subject ON change_class_record.subjectCode = subject.subjectCode LEFT JOIN lecturer ON change_class_record.lecturerID = lecturer.lecturerID LEFT JOIN lecturer AS applicant ON change_class_record.applicantID = applicant.lecturerID WHERE changeClassID = '$changeClassID'";
+$sql = "SELECT change_class_record.subjectCode AS subjectCode, typeOfChange, existingDate, existingDay, date_format(existingTime,'%H:%i') AS existingTime, hour, existingVenue, newDate, newDay, date_format(newTime,'%H:%i') AS newTime, newVenue, reason, subject.name AS subjectName, lecturer.name AS lecturerName, applicant.name AS applicantName, applicationDate, aaroAcknowledge, aaroComment, aaroAcknowledgeDate, deanOrHeadAcknowledge, deanOrHeadComment, deanOrHeadAcknowledgeDate, documentalProof FROM change_class_record LEFT JOIN subject ON change_class_record.subjectCode = subject.subjectCode LEFT JOIN lecturer ON change_class_record.lecturerID = lecturer.lecturerID LEFT JOIN lecturer AS applicant ON change_class_record.applicantID = applicant.lecturerID WHERE changeClassID = '$changeClassID'";
 
 $result = $conn->query($sql);
 
@@ -27,13 +27,12 @@ if ($result->num_rows > 0) {
       }
     $existingDate=$row['existingDate'];
     $existingDay=$row['existingDay'];
-    $existingStartTime=$row['existingStartTime'];
-    $existingEndTime=$row['existingEndTime'];
+    $existingTime=$row['existingTime'];
+    $hour=$row['hour'];
     $existingVenue=$row['existingVenue'];
     $newDate=$row['newDate'];
     $newDay=$row['newDay'];
-    $newStartTime=$row['newStartTime'];
-    $newEndTime=$row['newEndTime'];
+    $newTime=$row['newTime'];
     $newVenue=$row['newVenue'];
     $reason=$row['reason'];
     $subjectName=$row['subjectName'];
@@ -45,6 +44,15 @@ if ($result->num_rows > 0) {
     $deanOrHeadAcknowledge = $row['deanOrHeadAcknowledge'];
     $deanOrHeadComment = $row['deanOrHeadComment'];
     $documentalProof = $row['documentalProof'];
+
+    $time1 = DateTime::createFromFormat('H:i', $existingTime);
+    $time1->modify("+" . $hour . " hours");
+
+    $time2 = DateTime::createFromFormat('H:i', $newTime);
+    $time2->modify("+" . $hour . " hours");
+
+    $existingEndTime= $time1->format('H:i');
+    $newEndTime= $time2->format('H:i');
 
     if ($deanOrHeadAcknowledge == 0) {
       $deanOrHeadAcknowledge = 'Disapproved';
@@ -126,8 +134,8 @@ table,td{
         <?php  } ?>
         <tr>
           <th class="thInfo">Time</th>
-          <td class="table-light"><?php echo $existingStartTime .' to '. $existingEndTime; ?></td>
-          <td class="table-light"><?php echo $newStartTime .' to '. $newEndTime; ?></td>
+          <td class="table-light"><?php echo $existingTime .' to '. $existingEndTime; ?></td>
+          <td class="table-light"><?php echo $newTime .' to '. $newEndTime; ?></td>
         </tr>
         <tr>
           <th class="thInfo">Venue</th>
@@ -172,7 +180,7 @@ table,td{
           </tr> 
       </table>
       <table class="table"> 
-      <label for="">Academic Affairs & Registration Office</label>
+      <label for="">Academic Affairs, Admission & Registration Office </label>
           <tr>
             <th class="thReview">Acknowledge / <br>Not Acknowledge</th><td class="table-light"><?php echo $aaroAcknowledge; ?></td>
           </tr>

@@ -93,8 +93,8 @@ echo "<body style='background-color:#E5F5F8'>";
     </table>
     <p>I understand and agree that Southern University College has the permission to use my personal data for the purpose of administering. I have read, understand and agreed to the Personal Data Protection Act of Southern University College. <br> (Note: You may access and update your personal data by writing to us at <a href="mailto:reg@sc.edu.my">reg@sc.edu.my</a>)</p>
     </div>
-    <button name="apply" type="submit" class="btn btn-info" style="margin-left:20px;">Apply</button>
-    <button name="apply" type="button" class="btn btn-secondary" style="margin-left:20px;" onclick="confirmCancel()";>Cancel</button>
+    <button name="apply" type="submit" class="btn btn-info" style="margin-left:20px; margin-right:20px; float:right;">Apply</button>
+    <button name="apply" type="button" class="btn btn-outline-secondary" style=" margin-bottom: 20px; float:right;" onclick="confirmCancel()";>Cancel</button>
   </form>
 </div>
 

@@ -22,7 +22,7 @@ $userid = $_SESSION['userid'];
 $position = $_SESSION['position'];
 
 //Get the applicant info
-$sql1 = "SELECT change_class_record.subjectCode AS subjectCode, typeOfChange, existingDate, existingDay, date_format(existingStartTime,'%H:%i') AS existingStartTime, date_format(existingEndTime,'%H:%i') AS existingEndTime, existingVenue, newDate, newDay, date_format(newStartTime,'%H:%i') AS newStartTime, date_format(newEndTime,'%H:%i') AS newEndTime, newVenue, reason, subject.name AS subjectName, lecturer.name AS lecturerName, applicant.name AS applicantName, applicationDate, documentalProof FROM change_class_record LEFT JOIN subject ON change_class_record.subjectCode = subject.subjectCode LEFT JOIN lecturer ON change_class_record.lecturerID = lecturer.lecturerID LEFT JOIN lecturer AS applicant ON change_class_record.applicantID = applicant.lecturerID WHERE changeClassID = '$changeClassID'";
+$sql1 = "SELECT change_class_record.subjectCode AS subjectCode, typeOfChange, existingDate, existingDay, date_format(existingTime,'%H:%i') AS existingTime, hour, existingVenue, newDate, newDay, date_format(newTime,'%H:%i') AS newTime, newVenue, reason, subject.name AS subjectName, lecturer.name AS lecturerName, applicant.name AS applicantName, applicationDate, documentalProof FROM change_class_record LEFT JOIN subject ON change_class_record.subjectCode = subject.subjectCode LEFT JOIN lecturer ON change_class_record.lecturerID = lecturer.lecturerID LEFT JOIN lecturer AS applicant ON change_class_record.applicantID = applicant.lecturerID WHERE changeClassID = '$changeClassID'";
 
 $result1 = $conn->query($sql1);
 
@@ -37,13 +37,12 @@ if ($result1->num_rows > 0) {
       }
     $existingDate=$row['existingDate'];
     $existingDay=$row['existingDay'];
-    $existingStartTime=$row['existingStartTime'];
-    $existingEndTime=$row['existingEndTime'];
+    $existingTime=$row['existingTime'];
+    $hour=$row['hour'];
     $existingVenue=$row['existingVenue'];
     $newDate=$row['newDate'];
     $newDay=$row['newDay'];
-    $newStartTime=$row['newStartTime'];
-    $newEndTime=$row['newEndTime'];
+    $newTime=$row['newTime'];
     $newVenue=$row['newVenue'];
     $reason=$row['reason'];
     $subjectName=$row['subjectName'];
@@ -51,6 +50,15 @@ if ($result1->num_rows > 0) {
     $applicantName=$row['applicantName'];
     $applicationDate=$row['applicationDate'];
     $documentalProof=$row['documentalProof'];
+
+    $time1 = DateTime::createFromFormat('H:i', $existingTime);
+    $time1->modify("+" . $hour . " hours");
+
+    $time2 = DateTime::createFromFormat('H:i', $newTime);
+    $time2->modify("+" . $hour . " hours");
+
+    $existingEndTime= $time1->format('H:i');
+    $newEndTime= $time2->format('H:i');
   }
 }            
 
@@ -216,7 +224,7 @@ table,td{
   <div class="d-flex justify-content-center" style=" margin-top:40px ">
   <h3 style="margin-right: 20px">Replacement/ Permanent Change of Class Room Venue/ Time Application</h3>
   </div>
-    <div class="row" style="margin:40px; margin-top:15px">
+    <div class="row" style="margin:20px; margin-top:15px">
     <label for="" class="form-label" >Application Details</label>
     <table class="table">  
         <tr>
@@ -249,8 +257,8 @@ table,td{
         <?php  } ?>
         <tr>
           <th class="thInfo">Time</th>
-          <td class="table-light"><?php echo $existingStartTime .' to '. $existingEndTime; ?></td>
-          <td class="table-light"><?php echo $newStartTime .' to '. $newEndTime; ?></td>
+          <td class="table-light"><?php echo $existingTime .' to '. $existingEndTime; ?></td>
+          <td class="table-light"><?php echo $newTime .' to '. $newEndTime; ?></td>
         </tr>
         <tr>
           <th class="thInfo">Venue</th>
@@ -285,7 +293,7 @@ table,td{
         </tr>
     </table>
     <?php 
-    if($status == 'Approval'){
+    if($status == 'Review'){
       if($position == 'deanOrHod'){
         echo '<label class="form-label" style="margin-top: 30px; margin-left: 20px; font-size: 110%"><b>Faculty (Head of Department / Dean) Use</b></label>';
       } elseif($position =='aaro'){
@@ -351,7 +359,7 @@ table,td{
         <div class="row" style="margin: 20px; margin-left: 5px;">
           <label for="comment" class="col-md-1 col-form-label">Comments:</label>
           <div class="col-md-10">
-            <textarea class="form-control" placeholder="Leave a comment here" name="comment" id="comment"><?php
+            <textarea class="form-control" placeholder="Leave a comment here" name="comment" id="comment" required><?php
             if ($resultTemp->num_rows > 0) {
               if($position == 'deanOrHod' && $tempDeanOrHeadComment != null){
                 echo $tempDeanOrHeadComment;} 
@@ -370,9 +378,9 @@ table,td{
         <p>I voluntarily acknowledge and accept full responsibility for the decision I am about to make, understanding that my choice will have significant consequences.</p>
         </div>
         <input type="hidden" name="changeClassID" value="<?php echo $changeClassID; ?>">
-        <button name="submit" type="submit" class="btn btn-primary" style="margin-left:20px;">Submit</button>
-        <button name="save" type="submit" class="btn btn-info" style="margin-left:20px;" onclick="showSuccessMessage()";>Save</button>
-        <button name="cancel" type="button" class="btn btn-secondary" style="margin-left:20px;" onclick="confirmCancel()";>Cancel</button>
+        <button name="submit" type="submit" class="btn btn-primary" style="margin-left:20px; float:right;";>Submit</button>
+        <button name="save" type="submit" class="btn btn-outline-info" style="margin-left:20px; float:right;" onclick="showSuccessMessage()";>Save</button>
+        <button name="cancel" type="button" class="btn btn-outline-secondary" style="margin-left:20px; float:right;" onclick="confirmCancel()";>Cancel</button>
       </form>
       <?php
       
@@ -433,7 +441,7 @@ table,td{
         ?>
 
         
-        <label for="" class="form-label" >Academic Affairs & Registration Office</label>
+        <label for="" class="form-label" >Academic Affairs, Admission & Registration Office</label>
         <table class="table">  
           <tr>
             <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
@@ -450,7 +458,7 @@ table,td{
     <?php
         }?>
 
-      <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
+      <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-top:20px; float:right;" onclick="back()";>Back</button>
       <?php
         
 

@@ -34,7 +34,11 @@ echo "<body style='background-color:#E5F5F8'>";
 <script>
   var baseUrl = '../';
   function back() {
-    location.href = '../adminMain.php';
+    <?php if($position == 'aaro'){ ?>
+      location.href = '../aaroMain.php';
+    <?php }elseif($position =='afo'){ ?>
+      location.href = '../afoMain.php';
+    <?php } ?>
   }
 </script>
 
@@ -86,14 +90,13 @@ table,td{
           <?php }
           ?>
           </select>
-        <button name="check" type="submit" class="btn btn-secondary" style="margin-left:20px;">Check</button>
+        <button name="check" type="submit" class="btn btn-outline-secondary" style="margin-left:20px;">Check</button>
         </div>
         <div class="row justify-content-center" style="margin: 20px;">
         <input name="keyword" type="search" style="margin-right: 20px;" placeholder="Search" >
         <button name="search" class="btn btn-outline-secondary" type="submit">Search</button>
       </div>
     </form>
-  </div>
 </div>
 
 <div class="container-fluid" style="width: 90%;" >
@@ -123,47 +126,47 @@ table,td{
         if ($selectedSem == 1) {
           $startMonth = 3; // March
           $endMonth = 5;   // May
-          $sql = "SELECT document_record.documentID, applicantID, applicationDate, afoDecision, afoSignature, officialReceipt, updateApplicantSignature, collectionStatus FROM document_record WHERE YEAR(applicationDate) = '$selectedYear' AND
+          $sql = "SELECT documentID, applicantID, applicationDate, applicationStatus, waitingStatus, collectionStatus FROM document_record WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth";
       } elseif ($selectedSem == 2) {
           $startMonth = 6; // June
           $endMonth = 9;   // September
-          $sql = "SELECT document_record.documentID, applicantID, applicationDate, afoDecision, afoSignature, officialReceipt, updateApplicantSignature, collectionStatus FROM document_record WHERE YEAR(applicationDate) = '$selectedYear' AND
+          $sql = "SELECT documentID, applicantID, applicationDate, applicationStatus, waitingStatus, collectionStatus FROM document_record WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth";
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT document_record.documentID, applicantID, applicationDate, afoDecision, afoSignature, officialReceipt, updateApplicantSignature, collectionStatus FROM document_record WHERE YEAR(applicationDate) = '$selectedYear' AND ((MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth))";
+          $sql = "SELECT documentID, applicantID, applicationDate, applicationStatus, waitingStatus, collectionStatus FROM document_record WHERE YEAR(applicationDate) = '$selectedYear' AND ((MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth))";
       }
 
       $keyword="";
       if (isset($_POST['search']) && !empty($_POST['keyword'])) {
         $rowNumber = 1;
         $k=$_POST['keyword'];
-        $keyword=" where (documentID like '%".$k."%' OR applicantID like '%".$k."%')";  
-        $sql = "SELECT document_record.documentID, applicantID, applicationDate, afoDecision, afoSignature, officialReceipt, updateApplicantSignature, collectionStatus FROM document_record ".$keyword;
+        $keyword=" where (documentID like '%".$k."%' OR applicantID like '%".$k."%' OR applicationDate like '%".$k."%')";  
+        $sql = "SELECT documentID, applicantID, applicationDate, applicationStatus, waitingStatus, collectionStatus FROM document_record ".$keyword;
       }
 
       if (isset($_POST['search']) && empty($_POST['keyword'])) {
         echo '<script type="text/javascript">
-        alert("Please insert application id to search!");
+        alert("Please insert application id, applicant id or application date to search!");
         </script>';
       }
 
       if ($position == 'afo') {
         if ($selectedStatus == 'review') {
-         $sql .= " AND afoDecision IS NULL ";
+         $sql .= " AND waitingStatus IS NULL ";
         }elseif ($selectedStatus == 'waitingUpdate') {
-          $sql .= " AND afoDecision = 0";
+          $sql .= " AND waitingStatus = 0";
         }elseif ($selectedStatus == 'update') {
-          $sql .= " AND updateApplicantSignature = 1";
+          $sql .= " AND waitingStatus = 1 AND applicationStatus == 0";
         }elseif($selectedStatus == 'completed'){
-          $sql .= " AND afoSignature = 1";
+          $sql .= " AND applicationStatus = 1";
         }
       }
 
       if ($position == 'aaro') {
-        $sql .= " AND afoSignature = 1";
+        $sql .= " AND applicationStatus = 1";
         if ($selectedStatus == 'collection') {
           $sql .= " AND collectionStatus IS NULL ";
          }elseif ($selectedStatus == 'collecting') {
@@ -173,7 +176,7 @@ table,td{
          }
       }
 
-      $sql .= " ORDER BY applicationDate DESC";
+      $sql .= " ORDER BY documentID DESC";
       
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
@@ -181,19 +184,18 @@ table,td{
             $documentID=$row['documentID']; 
             $applicantID=$row['applicantID']; 
             $applicationDate=$row['applicationDate'];
-            $afoDecision = $row['afoDecision'];
-            $afoSignature = $row['afoSignature'];
-            $updateApplicantSignature = $row['updateApplicantSignature'];
+            $applicationStatus = $row['applicationStatus'];
+            $waitingStatus = $row['waitingStatus'];
             $collectionStatus = $row['collectionStatus'];
 
             if ($position == 'afo') {
-                if (is_null($afoDecision)) {
+                if (is_null($waitingStatus)) {
                     $status = 'review';
-                } elseif ($afoDecision == 0) {
+                } elseif ($waitingStatus == 0) {
                     $status = 'waiting update';
-                } if ($updateApplicantSignature == 1 && $afoSignature == 0) {
+                } if ($waitingStatus == 1 && $applicationStatus == 0) {
                   $status = 'update';
-                } elseif ($afoSignature == 1) {
+                } elseif ($applicationStatus == 1) {
                   $status = 'completed';
                 }
             } elseif($position == 'aaro'){
@@ -222,8 +224,8 @@ table,td{
         }
         ?> 
     </table>
-    <button name="back" type="button" class="btn btn-secondary" style = "margin:20px;" onclick="back()";>Back</button>
     </div>
-
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; float: right;" onclick="back()";>Back</button>
+    </div>
   </body>
 </html>
