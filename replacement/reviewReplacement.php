@@ -22,7 +22,7 @@ $userid = $_SESSION['userid'];
 $position = $_SESSION['position'];
 
 //Get the applicant info
-$sql1 = "SELECT change_class_record.subjectCode AS subjectCode, typeOfChange, existingDate, existingDay, date_format(existingTime,'%H:%i') AS existingTime, hour, existingVenue, newDate, newDay, date_format(newTime,'%H:%i') AS newTime, newVenue, reason, subject.name AS subjectName, lecturer.name AS lecturerName, applicant.name AS applicantName, applicationDate, documentalProof FROM change_class_record LEFT JOIN subject ON change_class_record.subjectCode = subject.subjectCode LEFT JOIN lecturer ON change_class_record.lecturerID = lecturer.lecturerID LEFT JOIN lecturer AS applicant ON change_class_record.applicantID = applicant.lecturerID WHERE changeClassID = '$changeClassID'";
+$sql1 = "SELECT change_class_record.subjectCode AS subjectCode, typeOfChange, existingDate, existingDay, date_format(existingTime,'%H:%i') AS existingTime, hour, existingVenue, newDate, newDay, date_format(newTime,'%H:%i') AS newTime, newVenue, reason, subject.name AS subjectName, lecturer.name AS lecturerName, applicant.name AS applicantName, applicationDate FROM change_class_record LEFT JOIN subject ON change_class_record.subjectCode = subject.subjectCode LEFT JOIN lecturer ON change_class_record.lecturerID = lecturer.lecturerID LEFT JOIN lecturer AS applicant ON change_class_record.applicantID = applicant.lecturerID WHERE changeClassID = '$changeClassID'";
 
 $result1 = $conn->query($sql1);
 
@@ -49,7 +49,6 @@ if ($result1->num_rows > 0) {
     $lecturerName=$row['lecturerName'];
     $applicantName=$row['applicantName'];
     $applicationDate=$row['applicationDate'];
-    $documentalProof=$row['documentalProof'];
 
     $time1 = DateTime::createFromFormat('H:i', $existingTime);
     $time1->modify("+" . $hour . " hours");

@@ -27,7 +27,7 @@ $position = $_SESSION['position'];
 
 
 //Get the applicant info
-$sql1 = "SELECT typeOfLeave, dateOfLeave, noOfDays, reason, student.name as studentName, student.studentID as studentID, student.contactNo, student.batchNo, applicationDate, documentalProof FROM leave_record LEFT JOIN student ON leave_record.applicantID=student.studentID WHERE leaveID = '$leaveID'";
+$sql1 = "SELECT typeOfLeave, dateOfLeave, noOfDays, reason, student.name as studentName, student.studentID as studentID, student.contactNo, student.batchNo, applicationDate FROM leave_record LEFT JOIN student ON leave_record.applicantID=student.studentID WHERE leaveID = '$leaveID'";
 
 $result1 = $conn->query($sql1);
 if ($result1->num_rows > 0) {
@@ -46,7 +46,6 @@ if ($result1->num_rows > 0) {
     $noOfDays=$row['noOfDays'];
     $reason=$row['reason'];
     $applicationDate=$row['applicationDate'];
-    $documentalProof=$row['documentalProof'];
   }
 }          
   // Submit the review data

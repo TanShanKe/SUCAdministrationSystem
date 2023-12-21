@@ -11,7 +11,7 @@ if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'lecturer') {
 $changeClassID = $_GET['changeClassID'];
 $status = $_GET['status'];
 
-$sql = "SELECT change_class_record.subjectCode AS subjectCode, typeOfChange, existingDate, existingDay, date_format(existingTime,'%H:%i') AS existingTime, hour, existingVenue, newDate, newDay, date_format(newTime,'%H:%i') AS newTime, newVenue, reason, subject.name AS subjectName, lecturer.name AS lecturerName, applicant.name AS applicantName, applicationDate, aaroAcknowledge, aaroComment, aaroAcknowledgeDate, deanOrHeadAcknowledge, deanOrHeadComment, deanOrHeadAcknowledgeDate, documentalProof FROM change_class_record LEFT JOIN subject ON change_class_record.subjectCode = subject.subjectCode LEFT JOIN lecturer ON change_class_record.lecturerID = lecturer.lecturerID LEFT JOIN lecturer AS applicant ON change_class_record.applicantID = applicant.lecturerID WHERE changeClassID = '$changeClassID'";
+$sql = "SELECT change_class_record.subjectCode AS subjectCode, typeOfChange, existingDate, existingDay, date_format(existingTime,'%H:%i') AS existingTime, hour, existingVenue, newDate, newDay, date_format(newTime,'%H:%i') AS newTime, newVenue, reason, subject.name AS subjectName, lecturer.name AS lecturerName, applicant.name AS applicantName, applicationDate, aaroAcknowledge, aaroComment, aaroAcknowledgeDate, deanOrHeadAcknowledge, deanOrHeadComment, deanOrHeadAcknowledgeDate FROM change_class_record LEFT JOIN subject ON change_class_record.subjectCode = subject.subjectCode LEFT JOIN lecturer ON change_class_record.lecturerID = lecturer.lecturerID LEFT JOIN lecturer AS applicant ON change_class_record.applicantID = applicant.lecturerID WHERE changeClassID = '$changeClassID'";
 
 $result = $conn->query($sql);
 
@@ -43,7 +43,6 @@ if ($result->num_rows > 0) {
     $aaroComment = $row['aaroComment'];
     $deanOrHeadAcknowledge = $row['deanOrHeadAcknowledge'];
     $deanOrHeadComment = $row['deanOrHeadComment'];
-    $documentalProof = $row['documentalProof'];
 
     $time1 = DateTime::createFromFormat('H:i', $existingTime);
     $time1->modify("+" . $hour . " hours");
