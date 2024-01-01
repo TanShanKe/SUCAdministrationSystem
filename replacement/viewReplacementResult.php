@@ -100,7 +100,7 @@ table,td{
   <div class="d-flex justify-content-center" style=" margin-top:40px ">
   <h3 style="margin-right: 20px">Replacement/ Permanent Change of Class Room Venue/ Time Application Result</h3>
   </div>
-  <div class="row" style="margin:40px; margin-top:15px">
+  <div class="row" style="margin:20px; margin-top:15px">
     <label for="">Application Details</label>
     <table class="table">  
         <tr>
@@ -188,8 +188,8 @@ table,td{
           </tr>   
       </table>
     <?php } ?>
-    <button name="back" type="button" class="btn btn-secondary" style = "margin-top:20px;" onclick="back()";>Back</button>
     </div>
+    <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; margin-right:20px; float: right;" onclick="back()";>Back</button>
   </div>
   </body>
 </html>

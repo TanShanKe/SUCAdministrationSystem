@@ -256,7 +256,7 @@ $jsonSubjects = json_encode($subjects);
           </td>
         </tr>
         <tr>
-          <th>Time:</th>
+          <th>Start Time:</th>
           <td><input type="time" id="existingTime" name="existingTime" value="09:00" step="1800" required></td>
           <td><input type="time" id="newTime" name="newTime" value="09:00" step="1800" required></td>
         </tr>

@@ -340,7 +340,14 @@ table,td{
           <label for="id" class="form-label" style="margin-top: 3px;">Desicion:</label>
           <div class="form-check form-check-inline" style="margin-left: 30px;">
             <input class="form-check-input" type="radio" name="decision" id="ack" value="ack"checked>
-            <label class="form-check-label" for="inlineRadio1">Acknowledge</label>
+            <label class="form-check-label" for="inlineRadio1">
+            <?php
+            if ($position == 'deanOrHod') {
+                echo 'Approved';
+            } elseif ($position == 'aaro') {
+                echo 'Acknowledged';
+            }
+            ?></label>
           </div>
           <div class="form-check form-check-inline" style="margin-left: 10px;">
             <input class="form-check-input" type="radio" name="decision" id="notAck" value="notAck"
@@ -352,7 +359,14 @@ table,td{
                 echo 'checked';
             }}
             ?>>
-            <label class="form-check-label" for="inlineRadio2">Not Acknowledge</label>
+            <label class="form-check-label" for="inlineRadio2">           
+               <?php
+            if ($position == 'deanOrHod') {
+                echo 'Disapproved';
+            } elseif ($position == 'aaro') {
+                echo 'Rejected';
+            }
+            ?></label>
           </div>
         </div>
         <div class="row" style="margin: 20px; margin-left: 5px;">
@@ -407,12 +421,12 @@ table,td{
 
         <table class="table">  
         <tr>
-          <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
-          <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
-        </tr> 
-        <tr>
           <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
           <th class="thReview">Date</th><td class="table-light"><?php echo $acknowledgeDate; ?></td>
+        </tr> 
+        <tr>
+          <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
+          <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
         </tr> 
         <tr>
           <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
@@ -442,13 +456,13 @@ table,td{
         
         <label for="" class="form-label" >Academic Affairs, Admission & Registration Office</label>
         <table class="table">  
+        <tr>
+            <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
+            <th class="thReview">Date</th><td class="table-light"><?php echo $acknowledgeDate; ?></td>
+          </tr> 
           <tr>
             <th class="thReview">Name</th><td class="table-light"><?php echo $name; ?></td>
             <th class="thReview">ID</th><td class="table-light"><?php echo $id; ?></td>
-          </tr> 
-          <tr>
-            <th class="thReview">Decision</th><td class="table-light"><?php echo $acknowledge; ?></td>
-            <th class="thReview">Date</th><td class="table-light"><?php echo $acknowledgeDate; ?></td>
           </tr> 
           <tr>
             <th class="thReview">Comment</th><td class="table-light " colspan="3"><?php echo $comment; ?></td>
@@ -456,14 +470,12 @@ table,td{
       </table>
     <?php
         }?>
-
-      <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-top:20px; float:right;" onclick="back()";>Back</button>
+    </div>
+      <button name="back" type="button" class="btn btn-outline-secondary" style = "margin-bottom:20px; margin-right:20px; float:right;" onclick="back()";>Back</button>
       <?php
         
 
   }?>
-  
-    </div>
   </div>
   </body>
 </html>
