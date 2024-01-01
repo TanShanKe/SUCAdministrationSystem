@@ -15,13 +15,23 @@ $years = array();
 while ($row1 = $result1->fetch_assoc()) {
     $years[] = $row1['year'];
 }
+if(empty($years)){
+  $years[] = date("Y");
+}elseif(!empty($years)){
+  $earliestYear = min($years);
+  $years[] = $earliestYear - 1;
+}
 sort($years);
 
-$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) IN (10, 11, 12, 1, 2) THEN 3 ELSE 1 END AS latestSem FROM leave_record WHERE applicantID = '$userid'";
+$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) BETWEEN 10 AND 12 THEN 3 WHEN MONTH(MAX(applicationDate)) BETWEEN 1 AND 2 THEN 4 ELSE 1 END AS latestSem FROM leave_record WHERE applicantID = '$userid'";
 $result2 = $conn->query($sql2);
 while ($row2 = $result2->fetch_assoc()) {
   $default_year = $row2['latestYear'];
   $default_sem = $row2['latestSem'];
+}
+if($default_sem == 4){
+  $default_year = $default_year-1;
+  $default_sem = 3;
 }
 
 include '../header.php';
@@ -127,7 +137,16 @@ table,td{
       } elseif ($selectedSem == 3) {
           $startMonth = 10; // January
           $endMonth = 2;   // February
-          $sql = "SELECT leaveID, applicationDate, aaroSignature FROM leave_record WHERE YEAR(applicationDate) = '$selectedYear' AND ((MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)) AND applicantID = '$userid' ORDER BY leaveID DESC";
+          $sql = "SELECT leaveID, applicationDate, aaroSignature FROM leave_record 
+          WHERE 
+          (( YEAR(applicationDate) = '$selectedYear' AND 
+            (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) 
+          ) 
+          OR 
+            ( YEAR(applicationDate) = '$selectedYear'+1 AND 
+            (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth) 
+          ))
+          AND applicantID = '$userid' ORDER BY leaveID DESC";
       }
 
         $result = $conn->query($sql);

@@ -23,7 +23,7 @@ if(isset($_POST['apply'])){
     }
   }
 
-  $sql3 = "SELECT YEAR(applicationDate) AS yearOfDeferment, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) IN (10, 11, 12, 1, 2) THEN 3 ELSE 1 END AS semOfDeferment FROM deferment_record WHERE defermentID = '$defermentID'";
+  $sql3 = "SELECT YEAR(applicationDate) AS yearOfDeferment, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) BETWEEN 10 AND 12 THEN 3 WHEN MONTH(MAX(applicationDate)) BETWEEN 1 AND 2 THEN 4 ELSE 1 END AS semOfDeferment FROM deferment_record WHERE defermentID = '$defermentID'";
 
   $result3 = $conn->query($sql3);
   if ($result3->num_rows > 0) {
@@ -31,6 +31,10 @@ if(isset($_POST['apply'])){
       $yearOfDeferment=$row['yearOfDeferment'];
       $semOfDeferment=$row['semOfDeferment'];
     }
+  }
+  if($semOfDeferment == 4){
+    $yearOfDeferment = $yearOfDeferment-1;
+    $semOfDeferment = 3;
   }
 
   // Generate id
@@ -84,12 +88,14 @@ $currentYear = date("Y");
 $currentMonth = date("M");
 if($currentMonth==3||$currentMonth==4||$currentMonth==5){
   $currentSem=1;
-}if($currentMonth==6||$currentMonth==7||$currentMonth==8||$currentMonth==9){
+}elseif($currentMonth==6||$currentMonth==7||$currentMonth==8||$currentMonth==9){
   $currentSem=2;
-}else{
+}elseif($currentMonth==10||$currentMonth==11||$currentMonth==12){
   $currentSem=3;
+}else{
+  $currentSem=4;
 }
-if ($currentSem == 1) {
+if ($currentSem == 1 || $currentSem == 4) {
   $sem = array("1", "2", "3");
 } elseif ($currentSem == 2) {
   $sem = array("2", "3");

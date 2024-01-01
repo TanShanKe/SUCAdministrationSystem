@@ -42,13 +42,23 @@ $years = array();
 while ($row1 = $result1->fetch_assoc()) {
     $years[] = $row1['year'];
 }
+if(empty($years)){
+  $years[] = date("Y");
+}elseif(!empty($years)){
+  $earliestYear = min($years);
+  $years[] = $earliestYear - 1;
+}
 sort($years);
 
-$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) IN (10, 11, 12, 1, 2) THEN 3 ELSE 1 END AS latestSem FROM resumption_of_studies_record WHERE applicantID = '$userid'";
+$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) BETWEEN 10 AND 12 THEN 3 WHEN MONTH(MAX(applicationDate)) BETWEEN 1 AND 2 THEN 4 ELSE 1 END AS latestSem FROM resumption_of_studies_record WHERE applicantID = '$userid'";
 $result2 = $conn->query($sql2);
 while ($row2 = $result2->fetch_assoc()) {
   $default_year = $row2['latestYear'];
   $default_sem = $row2['latestSem'];
+}
+if($default_sem == 4){
+  $default_year = $default_year-1;
+  $default_sem = 3;
 }
 
 include '../header.php';
@@ -63,11 +73,14 @@ echo "<body style='background-color:#E5F5F8'>";
   function applydisable(){
     var button = document.getElementById("applyBtn");
   <?php   
-  if ($registrarSignature == 1 && $registrarDecision == 1) { ?>
+  if (($registrarSignature == 1 && $registrarDecision == 1 && $result4->num_rows == 0) || ($registrarSignature == 1 && $registrarDecision == 1)) { ?>
     button.disabled = false;
   <?php  } 
-  if(($registrarSignature == 1 && $registrarDecision == 0)||($registrarSignature == 0 && $registrarDecision == null)||($registrarAcknowledge == 1 && $resumptionRegistrarSignature == 1)||is_null($defermentID)){ ?>
+  if(($registrarSignature == 1 && $registrarDecision == 0)||($registrarSignature == 0 && $registrarDecision == null)||($registrarAcknowledge == 1 && $resumptionRegistrarSignature == 1)||is_null($defermentID)||($registrarAcknowledge == null && $resumptionRegistrarSignature == 0)){ ?>
     button.disabled = true;
+  <?php }
+  if($result4->num_rows == 0 && $registrarSignature == 1 && $registrarDecision == 1){ ?>
+    button.disabled = false;
   <?php }
     ?> 
   }
@@ -90,7 +103,7 @@ table,td{
     <form  action="" method="post" enctype="multipart/form-data">
       <div class="d-flex justify-content-center">
       <h3 style="margin-right: 20px">Resumption of Studies Application</h3>
-      <button class="btn btn-primary" type="button" id = "applyBtn" onclick="location.href='applyResumption.php';">Apply</button> 
+      <button class="btn btn-primary" type="button" id = "applyBtn" onclick="location.href='applyResumption.php';">Apply</button>
       </div>
       <div class="row justify-content-center" style="margin: 20px;">
         <label for="year" class="form-label" style="margin-top: 5px; margin-right: 30px;">Select Year:</label>
@@ -153,10 +166,15 @@ table,td{
           $startMonth = 10; // January
           $endMonth = 2;   // February
           $sql = "SELECT resumptionID, applicationDate, aaroSignature, afoSignature, deanOrHeadSignature, registrarAcknowledge, registrarSignature FROM resumption_of_studies_record
-                WHERE YEAR(applicationDate) = '$selectedYear' AND (
-                  (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
-                  (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)
-                )AND
+          WHERE 
+          (( YEAR(applicationDate) = '$selectedYear' AND 
+            (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) 
+          ) 
+          OR 
+            ( YEAR(applicationDate) = '$selectedYear'+1 AND 
+            (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth) 
+          ))
+                AND
                 applicantID = '$userid' ORDER BY resumptionID DESC";
       }
         $result = $conn->query($sql);
@@ -171,7 +189,7 @@ table,td{
             $registrarSignature = $row['registrarSignature'];
 
                       
-              if ($aaroSignature == 0 || $afoSignature == 0 || $deanOrHeadSignature == 0 || $registrarSignature == 0) {
+              if ($registrarSignature == 0) {
                   $status = 'Pending';
               }
                elseif ($registrarAcknowledge == 1) {

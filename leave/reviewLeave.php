@@ -219,10 +219,10 @@ table,td{
         <table style="border:none;">
           <tr>
             <td style="vertical-align: top; border:none;"><input type="checkbox" name="agree" id="agree" style="margin-top: 7px; margin-right: 20px;" required></td>
-            <td style="border:none;"><label for="pdpa"><strong>Decision Responsibility Acknowledgment</strong></label></td>
+            <td style="border:none;"><label for="pdpa"><strong>Personal Data Protection Act (PDPA)</strong></label></td>
           </tr>
         </table>
-        <p>I voluntarily acknowledge and accept full responsibility for the decision I am about to make, understanding that my choice will have significant consequences.</p>
+        <p>I understand and agree that Southern University College has the permission to use my personal data for the purpose of administering. I have read, understand and agreed to the Personal Data Protection Act of Southern University College. <br> (Note: You may access and update your personal data by writing to us at <a href="mailto:reg@sc.edu.my">reg@sc.edu.my</a>)</p>
         </div>
         <input type="hidden" name="leaveID" value="<?php echo $leaveID; ?>">
         <button name="submit" type="submit" class="btn btn-primary" style="margin-left:20px; float:right;">Submit</button>

@@ -18,13 +18,23 @@ $years = array();
 while ($row = $result1->fetch_assoc()) {
     $years[] = $row['year'];
 }
+if(empty($years)){
+  $years[] = date("Y");
+}elseif(!empty($years)){
+  $earliestYear = min($years);
+  $years[] = $earliestYear - 1;
+}
 sort($years);
 
-$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) IN (10, 11, 12, 1, 2) THEN 3 ELSE 1 END AS latestSem FROM resumption_of_studies_record";
+$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) BETWEEN 10 AND 12 THEN 3 WHEN MONTH(MAX(applicationDate)) BETWEEN 1 AND 2 THEN 4 ELSE 1 END AS latestSem FROM resumption_of_studies_record";
 $result2 = $conn->query($sql2);
 while ($row = $result2->fetch_assoc()) {
   $default_year = $row['latestYear'];
   $default_sem = $row['latestSem'];
+}
+if($default_sem == 4){
+  $default_year = $default_year-1;
+  $default_sem = 3;
 }
 
 include '../header.php';
@@ -137,9 +147,14 @@ table,td{
           $startMonth = 10; // January
           $endMonth = 2;   // February
           $sql = "SELECT resumptionID, applicationDate, applicantID, deanOrHeadSignature, afoSignature, aaroSignature, registrarSignature, registrarAcknowledge FROM resumption_of_studies_record
-                WHERE YEAR(applicationDate) = '$selectedYear' AND (
-                  (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
-                  (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth))";
+          WHERE 
+          (( YEAR(applicationDate) = '$selectedYear' AND 
+            (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) 
+          ) 
+          OR 
+            ( YEAR(applicationDate) = '$selectedYear'+1 AND 
+            (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth) 
+          ))";
       }
 
       $keyword="";

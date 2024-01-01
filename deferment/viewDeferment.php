@@ -48,14 +48,25 @@ $years = array();
 while ($row1 = $result1->fetch_assoc()) {
     $years[] = $row1['year'];
 }
+if(empty($years)){
+  $years[] = date("Y");
+}elseif(!empty($years)){
+  $earliestYear = min($years);
+  $years[] = $earliestYear - 1;
+}
 sort($years);
 
-$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) IN (10, 11, 12, 1, 2) THEN 3 ELSE 1 END AS latestSem FROM deferment_record WHERE applicantID = '$userid'";
+$sql2 = "SELECT MAX(YEAR(applicationDate)) AS latestYear, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) BETWEEN 10 AND 12 THEN 3 WHEN MONTH(MAX(applicationDate)) BETWEEN 1 AND 2 THEN 4 ELSE 1 END AS latestSem FROM deferment_record WHERE applicantID = '$userid'";
 $result2 = $conn->query($sql2);
 while ($row2 = $result2->fetch_assoc()) {
   $default_year = $row2['latestYear'];
   $default_sem = $row2['latestSem'];
 } 
+
+if($default_sem == 4){
+  $default_year = $default_year-1;
+  $default_sem = 3;
+}
 
 include '../header.php';
 echo "<body style='background-color:#E5F5F8'>";
@@ -69,10 +80,10 @@ echo "<body style='background-color:#E5F5F8'>";
   function applydisable(){
     var button = document.getElementById("applyBtn");
   <?php   
-  if ($registrarSignature == 1 && $registrarDecision == 1) { ?>
+  if (($registrarSignature == 1 && $registrarDecision == 1) ||($registrarSignature == 0 && $registrarDecision == null)) { ?>
     button.disabled = true;
   <?php  } 
-  if($registrarAcknowledge == 1 && $resumptionRegistrarSignature == 1){ ?>
+  if(($registrarAcknowledge == 1 && $resumptionRegistrarSignature == 1)|| ($result3->num_rows == 0)){ ?>
     button.disabled = false;
   <?php }
     ?> 
@@ -174,11 +185,16 @@ table,td{
           $startMonth = 10; // January
           $endMonth = 2;   // February
           $sql = "SELECT defermentID, applicationDate, registrarSignature, registrarDecision FROM deferment_record
-                WHERE YEAR(applicationDate) = '$selectedYear' AND (
-                  (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) OR
-                  (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth)
-                )AND
-                applicantID = '$userid' ORDER BY defermentID DESC";
+          WHERE 
+          (( YEAR(applicationDate) = '$selectedYear' AND 
+            (MONTH(applicationDate) >= $startMonth AND MONTH(applicationDate) <= 12) 
+          ) 
+          OR 
+            ( YEAR(applicationDate) = '$selectedYear'+1 AND 
+            (MONTH(applicationDate) >= 1 AND MONTH(applicationDate) <= $endMonth) 
+          ))
+          AND
+          applicantID = '$userid' ORDER BY defermentID DESC";
       }
         $result = $conn->query($sql);
 
