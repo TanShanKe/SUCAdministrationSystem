@@ -134,7 +134,7 @@ table,td{
         if ($selectedSem == 1) {
           $startMonth = 3; // March
           $endMonth = 5;   // May
-          $sql = "SELECT resumptionID, applicationDate, applicantID, deanOrHeadSignature, afoSignature, aaroSignature, registrarSignature, registrarDecision FROM resumption_of_studies_record
+          $sql = "SELECT resumptionID, applicationDate, applicantID, deanOrHeadSignature, afoSignature, aaroSignature, registrarSignature, registrarAcknowledge FROM resumption_of_studies_record
           WHERE YEAR(applicationDate) = '$selectedYear' AND
           MONTH(applicationDate) BETWEEN $startMonth AND $endMonth";
       } elseif ($selectedSem == 2) {
