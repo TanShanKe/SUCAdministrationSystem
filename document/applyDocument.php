@@ -86,16 +86,16 @@ echo "<body style='background-color:#E5F5F8'>";
 
   function updateValue() {
     var documentText1 = document.getElementById("certOthers").value;
-    document.getElementById("certOthersCheckbox").value = documentText1;
+    document.getElementById("17").value = documentText1;
     var documentText2 = document.getElementById("others").value;
-    document.getElementById("othersCheckbox").value = documentText2;
+    document.getElementById("10").value = documentText2;
     var documentText3 = document.getElementById("year").value + document.getElementById("sem").value;
-    document.getElementById("yearsemSelect").value = "Semester Academic Record " + documentText3;
+    document.getElementById("12").value = "Semester Academic Record (RM10)" + documentText3;
     var documentText4 = document.getElementById("copies").value;
-    document.getElementById("copiesCheckbox").value = "Syllabus " + documentText4 + " copies";
+    document.getElementById("14").value = "Syllabus " + documentText4 + " copies (1 copy RM 35)";
     var documentText5 = document.getElementById("number").value;
     var documentText6 = document.getElementById("subjects").value;
-    document.getElementById("numberCheckbox").value = "Syllabus " + documentText5 + " subject  (Course Applied : " + documentText6 + ")";
+    document.getElementById("15").value = "Syllabus " + documentText5 + " subject  (1 subject RM 15) (Course Applied : " + documentText6 + ")";
   }
 
   function validateForm(){
@@ -173,11 +173,11 @@ function toggleInput() {
         <label class="form-label" style="margin-top: 10px; margin-right: 30px; color:#061392;"><b>Documents</b></label> 
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
-        <input type="checkbox" id="1" name="documents[]" value="Letter of KWSP" style="margin-right: 15px;">
+        <input type="checkbox" id="1" name="documents[]" value="Letter of KWSP (RM10)" style="margin-right: 15px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 30px;"><b>Letter of KWSP </b><1set> (@RM10)</label>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
-        <input type="checkbox" id="2" name="documents[]" value="Letter of MQA" style="margin-right: 15px;">
+        <input type="checkbox" id="2" name="documents[]" value="Letter of MQA (RM8)" style="margin-right: 15px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 30px;"><b>Letter of MQA </b><1set> (@RM8)</label>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px; margin-top: 20px;">
@@ -185,25 +185,25 @@ function toggleInput() {
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;">Type of Letter: </label>
-        <input type="checkbox" id="3" name="documents[]" value="Letter of student status" style="margin-right: 10px;">
+        <input type="checkbox" id="3" name="documents[]" value="Letter of student status (RM5)" style="margin-right: 10px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;">Letter of student status</label>
-        <input type="checkbox" id="4" name="documents[]" value="Letter of changing of programme" style="margin-right: 10px;">
+        <input type="checkbox" id="4" name="documents[]" value="Letter of changing of programme (RM5)" style="margin-right: 10px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;">Letter of changing of programme</label>
-        <input type="checkbox" id="5" name="documents[]" value="Letter of deferment / withdrawal" style="margin-right: 10px;">
+        <input type="checkbox" id="5" name="documents[]" value="Letter of deferment / withdrawal (RM5)" style="margin-right: 10px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;">Letter of deferment / withdrawal</label>
-        <input type="checkbox" id="6" name="documents[]" value="Letter of medium of instruction" style="margin-right: 10px;">
+        <input type="checkbox" id="6" name="documents[]" value="Letter of medium of instruction (RM5)" style="margin-right: 10px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;">Letter of medium of instruction</label>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
-        <input type="checkbox" id="7" name="documents[]" value="Letter of completion of studies" style="margin-right: 10px;">
+        <input type="checkbox" id="7" name="documents[]" value="Letter of completion of studies (RM5)" style="margin-right: 10px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;">Letter of completion of studies</label>
-        <input type="checkbox" id="8" name="documents[]" value="Letter of certifying date of expected completion" style="margin-right: 10px;">
+        <input type="checkbox" id="8" name="documents[]" value="Letter of certifying date of expected completion (RM5)" style="margin-right: 10px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;">Letter of certifying date of expected completion</label>
-        <input type="checkbox" id="9" name="documents[]" value="Letter of postponement for PLKN / National Services" style="margin-right: 10px;">
+        <input type="checkbox" id="9" name="documents[]" value="Letter of postponement for PLKN / National Services (RM5)" style="margin-right: 10px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;">Letter of postponement for PLKN / National Services</label>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
-        <input type="checkbox" id="10" name="documents[]" value="" id="othersCheckbox" style="margin-right: 10px;" onclick="toggleInput()">
+        <input type="checkbox" id="10" name="documents[]" value="" style="margin-right: 10px;" onclick="toggleInput()">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;">Others: </label>
         <input type="text" id="others" name="others" onkeyup="updateValue()" required disabled>
       </div>
@@ -211,9 +211,9 @@ function toggleInput() {
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;"><b>Academic Record:</b></label>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
-        <input type="checkbox" id="11" name="documents[]" value="Transcript" style="margin-right: 10px;">
+        <input type="checkbox" id="11" name="documents[]" value="Transcript (Student: RM20  Former Student: RM30)" style="margin-right: 10px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;">Transcript (Student: RM20  Former Student: RM30)</label>
-        <input type="checkbox" id="12" name="documents[]" value="" id="yearsemSelect" style="margin-right: 10px;" onclick="toggleInput()">
+        <input type="checkbox" id="12" name="documents[]" value="" style="margin-right: 10px;" onclick="toggleInput()">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 10px;">Semester Academic Record (@RM10)</label>
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 10px;">Year</label>
         <select name="year" id="year" style="margin-right: 10px;" onchange="updateValue()" required disabled>
@@ -234,28 +234,28 @@ function toggleInput() {
         </select>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px; margin-top: 20px;">
-        <input type="checkbox" id="13" name="documents[]" value="Renew of Student ID Card" style="margin-right: 10px; margin-bottom: 12px;">
+        <input type="checkbox" id="13" name="documents[]" value="Renew of Student ID Card (RM25)" style="margin-right: 10px; margin-bottom: 12px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-bottom: 20px; margin-right: 30px; "><b>Renew of Student ID Card (@RM25)</b></label>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;"><b>Syllabus: </b></label>
-        <input type="checkbox" id="14" name="documents[]" value="" id="copiesCheckbox" style="margin-right: 10px;" onclick="toggleInput()">
+        <input type="checkbox" id="14" name="documents[]" value="" style="margin-right: 10px;" onclick="toggleInput()">
         <input type="text" id="copies" name="copies" onkeyup="updateValue()" required disabled>
         <p style="margin: 7px;  margin-top: 5px;">copies (@RM35)</p>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
-        <input type="checkbox" id="15" name="documents[]" value="" id="numberCheckbox" style="margin-right: 10px;  margin-left: 60px;" onclick="toggleInput()">
+        <input type="checkbox" id="15" name="documents[]" value="" style="margin-right: 10px;  margin-left: 60px;" onclick="toggleInput()">
         <input type="text" id="number" name="number" onkeyup="updateValue()" required disabled>
         <p style="margin: 7px; margin-top: 5px;">subject (@RM15)</p> 
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 10px;">Course/Subject Applied:</label>
         <input type="text" id="subjects" name="subjects" onkeyup="updateValue()" required disabled>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px; margin-top: 20px;">
-        <input type="checkbox" id="16" name="documents[]" value="Student ID card for status verification at semester final examination" style="margin-right: 10px; margin-bottom: 12px;">
+        <input type="checkbox" id="16" name="documents[]" value="Student ID card for status verification at semester final examination (RM 20)" style="margin-right: 10px; margin-bottom: 12px;">
         <label for="document" class="form-label" style="margin-top: 5px; margin-bottom: 20px; margin-right: 30px;"><b>Student ID card for status verification at semester final examination </b>(@RM20)</label>
       </div>
       <div class="row" style="margin: 10px; margin-left: 20px;">
-        <input type="checkbox" id="17" name="documents[]" value="" id="certOthersCheckbox" style="margin-right: 10px;" onclick="toggleInput()">
+        <input type="checkbox" id="17" name="documents[]" value="" style="margin-right: 10px;" onclick="toggleInput()">
         <label for="document" class="form-label" style="margin-top: 5px; margin-right: 20px;"><b>Others: </b></label>
         <input type="text" id="certOthers" name="certOthers" onkeyup="updateValue()" required disabled>
       </div>

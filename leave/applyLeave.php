@@ -18,6 +18,7 @@ if(isset($_POST['apply'])){
   // Generate id
   $currentYear = date("y"); 
   $currentMonth = date("m"); 
+  $type = null;
   // Use a separate file for each month
   $counterFile = "id_counter_" . $currentYear . $currentMonth . ".txt"; 
   if (!file_exists($counterFile)) {
