@@ -264,8 +264,8 @@ window.onload = function() {
         <label for="subject" class="form-label" style="margin-top: 5px; margin-right: 30px;">Sem of Resumption</label>
         <select name="semOfResumption" id="semOfResumption" required>
         </select>
+        <p style="color:grey; margin-top:20px;">**If no option can be selected means you had deferment of studies more than 1 year and no resumption of studies application can be done**</p></td>
       </div>
-      <br>
       <div class="row" style="margin: 20px;">
       <table>
         <tr>
