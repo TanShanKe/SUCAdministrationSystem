@@ -14,8 +14,11 @@ $registrarDecision=null;
 $resumptionRegistrarSignature=null;
 $registrarAcknowledge=null;
 $defermentID=null;
+$category=null;
+$yearOfDeferment=null;
+$semOfDeferment=null;
 
-$sql3 = "SELECT defermentID, registrarSignature, registrarDecision FROM deferment_record WHERE applicantID = '$userid' ORDER BY defermentID DESC LIMIT 1";
+$sql3 = "SELECT defermentID, registrarSignature, registrarDecision, category, YEAR(applicationDate) AS yearOfDeferment, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) BETWEEN 10 AND 12 THEN 3 WHEN MONTH(MAX(applicationDate)) BETWEEN 1 AND 2 THEN 4 ELSE 1 END AS semOfDeferment FROM deferment_record WHERE applicantID = '$userid' ORDER BY defermentID DESC LIMIT 1";
 
 $result3 = $conn->query($sql3);
 if ($result3->num_rows > 0) {
@@ -23,6 +26,9 @@ if ($result3->num_rows > 0) {
     $registrarDecision=$row['registrarDecision'];
     $registrarSignature=$row['registrarSignature'];
     $defermentID=$row['defermentID'];
+    $yearOfDeferment=$row['yearOfDeferment'];
+    $semOfDeferment=$row['semOfDeferment'];
+    $category=$row['category'];
   }
 }
 
@@ -81,6 +87,9 @@ echo "<body style='background-color:#E5F5F8'>";
   <?php }
   if($result4->num_rows == 0 && $registrarSignature == 1 && $registrarDecision == 1){ ?>
     button.disabled = false;
+  <?php }
+  if($category == 0){ ?>
+    button.disabled = true;
   <?php }
     ?> 
   }

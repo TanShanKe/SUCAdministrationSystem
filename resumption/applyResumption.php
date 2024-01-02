@@ -10,6 +10,19 @@ if (!isset($_SESSION['userid']) || $_SESSION['position'] !== 'student') {
 
 $userid = $_SESSION['userid'];
 
+$yearOfDeferment=null;
+$semOfDeferment=null;
+
+$sql = "SELECT YEAR(applicationDate) AS yearOfDeferment, CASE WHEN MONTH(MAX(applicationDate)) BETWEEN 3 AND 5 THEN 1 WHEN MONTH(MAX(applicationDate)) BETWEEN 6 AND 9 THEN 2 WHEN MONTH(MAX(applicationDate)) BETWEEN 10 AND 12 THEN 3 WHEN MONTH(MAX(applicationDate)) BETWEEN 1 AND 2 THEN 4 ELSE 1 END AS semOfDeferment FROM deferment_record WHERE applicantID = '$userid' ORDER BY defermentID DESC LIMIT 1";
+
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+  while ($row = $result->fetch_assoc()) {
+    $yearOfDeferment=$row['yearOfDeferment'];
+    $semOfDeferment=$row['semOfDeferment'];
+  }
+}
+
 if(isset($_POST['apply'])){
 
   date_default_timezone_set('Asia/Kuala_Lumpur');
@@ -84,54 +97,137 @@ echo "<body style='background-color:#E5F5F8'>";
   }
 
 <?php 
-$currentYear = date("Y"); 
-$currentMonth = date("M");
-if($currentMonth==3||$currentMonth==4||$currentMonth==5){
-  $currentSem=1;
-}elseif($currentMonth==6||$currentMonth==7||$currentMonth==8||$currentMonth==9){
-  $currentSem=2;
-}elseif($currentMonth==10||$currentMonth==11||$currentMonth==12){
-  $currentSem=3;
-}else{
-  $currentSem=4;
-}
-if ($currentSem == 1 || $currentSem == 4) {
+if ($semOfDeferment == 4 || $semOfDeferment == 3) {
   $sem = array("1", "2", "3");
-} elseif ($currentSem == 2) {
+} elseif ($semOfDeferment == 1) {
   $sem = array("2", "3");
-} elseif ($currentSem == 3) {
+} elseif ($semOfDeferment == 2) {
   $sem = array("3");
 }
+if ($semOfDeferment == 4 ) {
+  $yearOfDeferment = $yearOfDeferment-1;
+}
+$currentMonth=date("M");
 ?>
 
-  window.onload = function() {
-  var years = {
-    "<?php echo $currentYear ?>": <?php echo json_encode($sem); ?>,
-    "<?php echo $currentYear + 1; ?>": ["1", "2", "3"]
-  };
+window.onload = function() {
 
-  var yearSel = document.getElementById("yearOfResumption");
-  var semSel = document.getElementById("semOfResumption");
+    const d = new Date();
+    let month = d.getMonth();
+    let year = d.getFullYear();
 
-  semSel.length = 0;
-  var selectedYear = yearSel.value;
-  for (var i = 0; i < years[selectedYear].length; i++) {
-    var option = new Option(years[selectedYear][i], years[selectedYear][i]);
-    semSel.options[semSel.options.length] = option;
-  if (i === 0) {
-    option.selected = true;
-  }
-  }
+    var years = {
+        <?php if ($semOfDeferment == 3 || $semOfDeferment == 4): ?>
+            "<?php echo $yearOfDeferment + 1; ?>": <?php echo json_encode($sem); ?>
+        <?php else: ?>
+            "<?php echo $yearOfDeferment ?>": <?php echo json_encode($sem); ?>,
+        <?php endif; ?>
+        <?php if ($semOfDeferment != 4 && $semOfDeferment != 3): ?>
+            <?php if ($semOfDeferment == 1): ?>
+                "<?php echo $yearOfDeferment + 1 ?>": ["1"]
+            <?php elseif ($semOfDeferment == 2): ?>
+                "<?php echo $yearOfDeferment + 1 ?>": ["1", "2"]
+            <?php endif; ?>
+        <?php endif; ?>
+    };
 
-  yearSel.onchange = function() {
+    var yearSel = document.getElementById("yearOfResumption");
+    var semSel = document.getElementById("semOfResumption");
+
+    semSel.length = 0;
+    var selectedYear = yearSel.value;
+
+    // Check if the selected year is defined in the years object
+    if (years[selectedYear]) {
+        for (var i = 0; i < years[selectedYear].length; i++) {
+          var optionValue = years[selectedYear][i];
+            var optionText = optionValue;
+
+            // Create a new Option element
+            var option = new Option(optionText, optionValue);
+
+            if(selectedYear==year){
+              if(month>=3 && month<=5){ 
+              if (optionValue == 1) {
+                option.disabled = true;
+              }
+            }
+            if(month>=6 && month<=9){ 
+              if (optionValue == 1) {
+                option.disabled = true;
+              }
+              if (optionValue == 2) {
+                option.disabled = true;
+              }
+            }
+            if(month>=10 && month<=12){ 
+              if (optionValue == 1) {
+                option.disabled = true;
+              }
+              if (optionValue == 2) {
+                option.disabled = true;
+              }
+              if (optionValue == 3) {
+                option.disabled = true;
+              }
+            }
+            }
+
+            // Add the option to the select element
+            semSel.options[semSel.options.length] = option;
+
+
+        }
+    }
+
+    yearSel.onchange = function() {
     semSel.length = 0;
     var selectedYear = this.value;
-    // display correct values
-    for (var i = 0; i < years[selectedYear].length; i++) {
-      semSel.options[semSel.options.length] = new Option(years[selectedYear][i], years[selectedYear][i]);
+
+    // Check if the selected year is defined in the years object
+    if (years[selectedYear]) {
+        // Display correct values
+        for (var i = 0; i < years[selectedYear].length; i++) {
+            var optionValue = years[selectedYear][i];
+            var optionText = optionValue;
+
+            // Create a new Option element
+            var option = new Option(optionText, optionValue);
+
+            if(selectedYear==year){
+              if(month>=3 && month<=5){ 
+              if (optionValue == 1) {
+                option.disabled = true;
+              }
+            }
+            if(month>=6 && month<=9){ 
+              if (optionValue == 1) {
+                option.disabled = true;
+              }
+              if (optionValue == 2) {
+                option.disabled = true;
+              }
+            }
+            if(month>=10 && month<=12){ 
+              if (optionValue == 1) {
+                option.disabled = true;
+              }
+              if (optionValue == 2) {
+                option.disabled = true;
+              }
+              if (optionValue == 3) {
+                option.disabled = true;
+              }
+            }
+            }
+
+            // Add the option to the select element
+            semSel.options[semSel.options.length] = option;
+        }
     }
-  }
 }
+}
+
 </script>
 
 
@@ -140,20 +236,33 @@ if ($currentSem == 1 || $currentSem == 4) {
     <form  action="" method="post" enctype="multipart/form-data">
       <h3 style="margin-top: 10px; margin-bottom: 30px;"><center>Resumption of Studies Application Form</center></h3>
       <div class="row" style="margin: 20px;"> 
-          <label class="form-label" style="margin-top: 10px; margin-right: 30px; color:#061392;"><b>Resumption Details</b></label> 
+          <label class="form-label" style="margin-top: 10px; margin-right: 30px; color:#061392;"><b>Resumption Details</b></label>
       </div>
       <div class="row" style="margin: 20px;">
         <label for="subject" class="form-label" style="margin-top: 5px; margin-right: 30px;">Year of Resumption</label>
-        <select name="yearOfResumption" id="yearOfResumption" style="margin-right: 50px;">
+        <select name="yearOfResumption" id="yearOfResumption" style="margin-right: 50px;" required>
             <?php
             $currentYear = date("Y");
-            for ($i = $currentYear; $i <= $currentYear + 1; $i++) {
-                echo "<option value=\"$i\">$i</option>";
-            }
+            if ($semOfDeferment == 3 || $semOfDeferment == 4) {
+              $yearOfDeferment = $yearOfDeferment+1;
+              echo "<option value=\"$yearOfDeferment\"";
+              if ($yearOfDeferment < $currentYear) {
+                  echo "disabled";
+              }
+              echo ">$yearOfDeferment</option>";
+          } else {
+              for ($i = $yearOfDeferment; $i <= $yearOfDeferment + 1; $i++) {
+                  echo "<option value=\"$i\"";
+                  if ($i<$currentYear) {
+                    echo "disabled=\"disabled\"";
+                }
+                  echo ">$i</option>";
+              }
+          }
             ?>
         </select>
         <label for="subject" class="form-label" style="margin-top: 5px; margin-right: 30px;">Sem of Resumption</label>
-        <select name="semOfResumption" id="semOfResumption">
+        <select name="semOfResumption" id="semOfResumption" required>
         </select>
       </div>
       <br>
